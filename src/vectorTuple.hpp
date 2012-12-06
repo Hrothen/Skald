@@ -2,6 +2,8 @@
 #ifndef VECTOR_TUPLE_HPP
 #define VECTOR_TUPLE_HPP
 #include <vector>
+#include <boost/concept/assert,hpp>
+#include "Component.hpp"
 namespace skald{
 //there's probably a c++11 function to do this already
 //deduces the type of an element in a variadic pack
@@ -68,6 +70,10 @@ template<> struct vectorTuple<> {};
 
 template<class T, class... components>
 struct vectorTuple<T,components...> : private vectorTuple<components...>{
+
+	//assert each component type satisfies component concept
+	BOOST_CONCEPT_ASSERT((Component<T>));
+
 	vectorTuple(const T& f, const components&... rest):
 		vectorTuple<components...>(rest...),_front(f)
 	{
