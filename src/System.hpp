@@ -10,7 +10,7 @@ public:
 	~System();
 
 	//unique identifier for each system class
-	virtual const int id;
+	const int getID()const{return id;}
 
 	//init is called once, when the system is registered with the manager
 	virtual void init() = 0;
@@ -25,6 +25,8 @@ public:
 protected:
 	int priority;		//priority of the system in the queue, lower values are run first
 	int threadGroup;	//thread group the system belongs to
-	};
+private:
+	const int id = 0;
+};
 }
 #endif

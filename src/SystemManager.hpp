@@ -2,9 +2,9 @@
 #ifndef SKALD_SYSTEM_MANAGER_HPP
 #define SKALD_SYSTEM_MANAGER_HPP
 #include <vector>
-#include <memory>
-#include "System.hpp"
 namespace skald{
+
+class System;
 
 //this class manages an ordered list of systems
 //IMPORTANT: SystemManager does not own any of the systems it manages
