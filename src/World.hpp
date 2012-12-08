@@ -8,6 +8,7 @@
 namespace skald{
 
 //controller class holding the system manager and entity manager
+//this class is the user's interface into the entity-component system
 template<class indexType = uint8_t,class... components>
 class World
 {
