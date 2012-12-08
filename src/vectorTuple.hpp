@@ -20,6 +20,8 @@ struct typeAtIndex<0,T,args...>{
 	typedef T type;
 };
 
+/************************************************************/
+
 //finds the first occurence of a given type within a variadic pack
 template<int I,class Key,class T,class... args>
 struct indexOfType<I,Key,T,args...>{
@@ -33,6 +35,8 @@ struct indexOfType<I,Key,K,args...>{
 };
 
 template<int I,class... args> struct indexOfType;
+
+/************************************************************/
 
 //get an element at a certain index, used in get<index> to get the elment of a tuple at index
 template<int index>
@@ -60,6 +64,7 @@ struct getVec<0>{
 	}
 };
 
+/***************************************************************/
 
 //A tuple of std::vectors of the given elements
 //getting the type of an std::tuple of vectors of types at compile time

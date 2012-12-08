@@ -36,11 +36,14 @@ public:
 	}
 private:
 
+	//takes a bitmask and a vector of indicies and deletes all the corresponding
+	//components from their lists, also updates the other entities so their
+	//index vectors point to the right component
 	template<unsigned int Index = sizeof...(components) - 1>
 	inline typename std::enable_if<Index >= 0>::type
 	deleteComponents(const unsigned long b,const std::vector<indexType>& v){
 		if(b & 1UL<<Index){
-			auto & row = get<Index>(componentVectors);
+			auto & row = componentVectors.get<Index>();
 			row.erase(v.back());
 			//update entities with new component indicies
 			for(auto e : entities){

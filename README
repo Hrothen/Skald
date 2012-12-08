@@ -1,0 +1,5 @@
+Skald: C++ Entity-Component system
+
+This is a really early work in progress, it doesn't compile,
+it probably has typos, most functions don't even have a prototype,
+and I don't actually know how to use boost:concepts or gtest yet.
