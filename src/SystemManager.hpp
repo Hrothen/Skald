@@ -2,6 +2,7 @@
 #ifndef SKALD_SYSTEM_MANAGER_HPP
 #define SKALD_SYSTEM_MANAGER_HPP
 #include <vector>
+#include <algorithm>
 namespace skald{
 
 class System;
@@ -11,19 +12,32 @@ class System;
 //TODO: system pools for threading
 class SystemManager{
 public:
-	SystemManager();
-	~SystemManager();
+	SystemManager():systems(0):lockSystems(false){}
+	~SystemManager(){}
 
 	bool canModify()const{return lockSystems;}
 
 	//adds a system to the manager
-	void add(const System&);
+	void add(const System& s){
+		auto i = std::upper_bound(systems.begin(),systems.end(),s,
+			[](const System& a,const System& b){return a->getPriority() < b->getPriority()});
+		systems.insert(i,s);
+	}
 
 	//removes a system from the manager
-	void remove(const System&);
+	void remove(const System& s){
+		auto i = std::lower_bound(systems.begin(),systems.end(),s,
+			[](const System& a,const System& b){return a->getPriority() < b->getPriority()});
+		systems.erase(i);
+	}
 
 	//runs each systems update() method
-	void update(const double);
+	void update(const double t){
+		lockSystems = true;
+		for(auto s : systems)
+			s->update(t);
+		lockSystems = false;
+	}
 
 	System& get(const int id){
 		for(auto S : systems)
