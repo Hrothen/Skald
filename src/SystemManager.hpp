@@ -25,6 +25,12 @@ public:
 	//runs each systems update() method
 	void update(const double);
 
+	System& get(const int id){
+		for(auto S : systems)
+			if(S->getID() == id)
+				return S;
+	}
+
 private:
 	//vector of system pointers, sorted by priority
 	std::vector<System*> systems;

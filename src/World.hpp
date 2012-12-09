@@ -13,8 +13,12 @@ template<class indexType = uint8_t,class... components>
 class World
 {
 public:
-	World();
-	~World();
+	World(){}
+	~World(){}
+
+	inline entityID addEntity(){}
+
+	inline void removeEntity(entityID){}
 
 	inline void addSystem(const System& s){
 		systems.addSystem(s);
@@ -24,6 +28,10 @@ public:
 	inline void removeSystem(const System& s){
 		systems.remove(s);
 		s.destroy();
+	}
+
+	inline System& getSystem(const int id){
+		return systems.get(id);
 	}
 
 	inline void update(const double t){

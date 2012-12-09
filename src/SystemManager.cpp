@@ -1,6 +1,6 @@
 #include "SystemManager.hpp"
 #include <algorithm>
-#include "System"
+#include "System.hpp"
 using namespace skald;
 
 SystemManager::SystemManager():systems(0):lockSystems(false){}

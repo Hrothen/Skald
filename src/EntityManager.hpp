@@ -6,6 +6,7 @@
 #include <vector>
 #include <array>
 #include <pair>
+#include <set>
 #include <type_traits>
 #include "Components.hpp"
 #include "vectorTuple.hpp"
@@ -13,6 +14,15 @@
 namespace skald{
 typedef uint16_t entityID;
 
+/*
+ * Class representing an entity in the system.
+ * For the template parameters, maxComponents is
+ * the total number of component classes, while
+ * indexType is the smallest integer type that can
+ * index the maximum number of entities in the game
+ * the default is one byte, allowing 256 entities, which might
+ * be a bit low for some users.
+ */
 template<size_t maxComponents,class indexType = uint8_t>
 class entity{
 	friend class EntityManager;
@@ -30,9 +40,56 @@ template<class indexType = uint8_t,class... components>
 class EntityManager{
 public:
 	entityID createEntity(){
+		if(freeEntities.empty() == true){
+			nextID++;
+			return nextID - 1;
+		}
+		else{
+			auto i = freeEntities.begin();
+			entityID e = *i;
+			freeEntities.erase(i);
+		}
 	}
 
-	void deleteEntity(const entityID id){
+	//Sets the ID and components of an entity to be availible when creating a new
+	//entity, but does not delete the components. If your code makes assumptions
+	//about the data layout after removing an entity, you may want to use purgeEntity()
+	//instead.
+	void removeEntity(const entityID id){
+	}
+
+	//deletes an entity's components from the pool and discards it
+	//only use this if you really need the components removed, it's slow
+	void purgeEntity(const entityID id){
+		deleteComponents(entities[id].mask.to_ulong(),entities[id].indicies);
+		entities[id].mask.reset();
+		entities[id].indicies.clear();
+		freeEntities.add(id);
+	}
+
+	//adds a component to the specified entity
+	template <class T>
+	void addComponent(entityID e,T&& component){
+		auto & v = componentVectors.get<T>();
+		auto & f = freeComponents[indexOfType<T>::index];
+		const std::bitset<entities[e].mask.size()> b(std::forward<T>(component).id);
+		entities[e].mask |= b;
+		int acc = 0;
+		for(int i = 0,i < b.size(), ++i){
+			if(entities[e].mask[i] == true)
+				acc++;
+			if (b[i] == true)
+				break;
+		}
+		if(f.empty() == false){
+			v[f.back()] = component;
+			entities[e].indicies.insert(acc,f.back());
+			f.pop_back();
+		}
+		else{
+			v.push_back(component);
+			entities[e].indicies.insert(acc,v.size());
+		}
 	}
 private:
 
@@ -76,8 +133,13 @@ private:
 	entityID nextID;
 	//vector of entities
 	std::vector<entity<sizeof...(components),indexType>> entities;
+	//set of entityIDs that have been discarded and can be reused
+	std::set<entityID> freeEntities;
 	//tuple of vectors of components
 	vectorTuple<components...> componentVectors;
+	//array of index sets used to keep track of discarded components
+	//TODO: might be better to use a deque stack than vectors, consider it
+	std::array<std::std::vector<indexType>,sizeof...(components)> freeComponents;
 };
 }
 #endif
