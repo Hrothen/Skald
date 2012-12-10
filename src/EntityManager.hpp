@@ -1,6 +1,7 @@
 #pragma once
 #ifndef SKALD_ENTITY_MANAGER_HPP
 #define SKALD_ENTITY_MANAGER_HPP
+#include <assert>
 #include <bitset>
 #include <cstdint>
 #include <vector>
@@ -56,6 +57,23 @@ public:
 	//about the data layout after removing an entity, you may want to use purgeEntity()
 	//instead.
 	void removeEntity(const entityID id){
+		if(id == nextID - 1)
+			nextID--;
+		else
+			freeEntities.add(id);
+		int acc = 0;
+		for(int i : entities[id].indicies){
+			//this only happens if we've somehow managed to insert an index without
+			//updating the mask
+			assert(acc >= entities[id].mask.size());
+			while (entities[id].mask[acc] == false)
+				acc++;
+			//FIXME: this assumes components have been passed in to the
+			//manager in order by their id field
+			freeComponents[acc].push_back(i);
+		}
+		entities[id].mask.reset();
+		entities[id].indicies.clear();
 	}
 
 	//deletes an entity's components from the pool and discards it
@@ -64,12 +82,15 @@ public:
 		deleteComponents(entities[id].mask.to_ulong(),entities[id].indicies);
 		entities[id].mask.reset();
 		entities[id].indicies.clear();
-		freeEntities.add(id);
+		if(id == nextID - 1)
+			nextID--;
+		else
+			freeEntities.add(id);
 	}
 
 	//adds a component to the specified entity
 	template <class T>
-	void addComponent(entityID e,T&& component){
+	void addComponent(const entityID e,T&& component){
 		auto & v = componentVectors.get<T>();
 		auto & f = freeComponents[indexOfType<T>::index];
 		const std::bitset<entities[e].mask.size()> b(std::forward<T>(component).id);
@@ -90,6 +111,10 @@ public:
 			v.push_back(component);
 			entities[e].indicies.insert(acc,v.size());
 		}
+	}
+
+	template<class T>
+	void removeComponent(const entityID e,T&& component){
 	}
 private:
 
