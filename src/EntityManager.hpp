@@ -115,8 +115,27 @@ public:
 
 	template<class T>
 	void removeComponent(const entityID e,T&& component){
+		int acc = 0;
+		for(acc, acc < entities[e].mask.size(); ++acc)
+			if(component.id >> acc == 1)
+				break;
+		int i = onesBelowIndex(entities[e].mask,acc);
+		auto & f = freeComponents[indexOfType<T>::index];
+		auto & v = componentVectors.get<T>();
+		f.push_back(entities[e].indicies[i + 1]);
+		entities[e].indicies.erase(i+1);
+		entities[e].mask.reset(acc);
 	}
 private:
+
+	int onesBelowIndex(const std::bitmask<sizeof...(components) mask,const int index){
+		int acc = 0;
+		for(int i = index - 1; i >= 0, --i){
+			if(mask[i] == true)
+				acc++
+		}
+		return acc;
+	}
 
 	//takes a bitmask and a vector of indicies and deletes all the corresponding
 	//components from their lists, also updates the other entities so their
