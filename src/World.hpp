@@ -16,9 +16,23 @@ public:
 	World(){}
 	~World(){}
 
-	inline entityID addEntity(){}
+	inline entityID addEntity(){
+		return entities.createEntity();
+	}
 
-	inline void removeEntity(entityID){}
+	inline void removeEntity(const entityID e,bool purge = false){
+		purge ? entities.purgeEntity(e) : entities.removeEntity(e);
+	}
+
+	template<class T>
+	inline void addComponent(const entityID e,T&& c){
+		entities.addComponent(e,std::forward<T>(c));
+	}
+
+	template<class T>
+	inline void removeComponent(const entityID e,T&& c){
+		entities.removeComponent(e,std::forward<T>(c));
+	}
 
 	inline void addSystem(const System& s){
 		systems.addSystem(s);
