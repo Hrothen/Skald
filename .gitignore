@@ -1,2 +1,8 @@
+#ignore the gtest sources
+vendor/gtest/*
+
+#ignore builds
+build/*
+
 #ignore objects and archives
 *.[oa]
