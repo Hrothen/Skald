@@ -6,7 +6,7 @@ namespace skald{
 //Abstract base class for systems
 class System{
 public:
-	System(int p,int t):priority(p),threadGroup(t);
+	System(int p,int t):priority(p),threadGroup(t){};
 	~System();
 
 	//unique identifier for each system class

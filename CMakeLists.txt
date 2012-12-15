@@ -33,11 +33,11 @@ include_directories(
 # Test Sources
 set (${PROJECT_NAME}_TEST_SOURCES
     test/runAllTests.cpp
-    test/systemTests.cpp
+    test/entityTests.cpp
 )
 
 # Test Build Rules
-set (CMAKE_CXX_FLAGS "-std=c++11 -stdlib=libc++ -w")
+set (CMAKE_CXX_FLAGS "-std=c++11 -stdlib=libc++ -Wall")
 include_directories(${CMAKE_SOURCE_DIR}/src)
 add_executable(testrunner ${${PROJECT_NAME}_TEST_SOURCES})
 target_link_libraries(testrunner gtest gtest_main)

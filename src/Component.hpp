@@ -2,7 +2,7 @@
 #ifndef SKALD_COMPONENT_HPP
 #define SKALD_COMPONENT_HPP
 #include <bitset>
-#include <boost/concept.hpp>
+#include <boost/concept_check.hpp>
 
 namespace skald{
 	

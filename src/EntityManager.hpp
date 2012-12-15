@@ -1,12 +1,12 @@
 #pragma once
 #ifndef SKALD_ENTITY_MANAGER_HPP
 #define SKALD_ENTITY_MANAGER_HPP
-#include <assert>
+#include <cassert>
 #include <bitset>
 #include <cstdint>
 #include <vector>
 #include <array>
-#include <pair>
+#include <utility>
 #include <set>
 #include <type_traits>
 #include "Components.hpp"
@@ -31,7 +31,7 @@ public:
 	entityID id;
 private:
 
-	explicit entity(const entityID _id):id(_id),mask(0),indicies(0){}
+	explicit entity(const entityID _id):id{_id},mask{},indicies{} {}
 
 	std::bitset<maxComponents> mask;
 	std::vector<indexType> indicies;
@@ -40,6 +40,10 @@ private:
 template<class indexType = uint8_t,class... components>
 class EntityManager{
 public:
+
+	EntityManager():nextID(0){}
+	~EntityManager(){}
+
 	entityID createEntity(){
 		if(freeEntities.empty() == true){
 			nextID++;
@@ -117,10 +121,10 @@ public:
 	void removeComponent(const entityID e,T&& component){
 		int acc = 0;
 		for(acc, acc < entities[e].mask.size(); ++acc)
-			if(component.id >> acc == 1)
+			if(std::forward<T>(component).id >> acc == 1)
 				break;
 		int i = onesBelowIndex(entities[e].mask,acc);
-		auto & f = freeComponents[indexOfType<T>::index];
+		auto & f = freeComponents[indexOfType<T,components...>::index];
 		auto & v = componentVectors.get<T>();
 		f.push_back(entities[e].indicies[i + 1]);
 		entities[e].indicies.erase(i+1);
@@ -172,7 +176,7 @@ private:
 	//might want to make this throw an error though, since it should never be called
 	template<unsigned int Index>
 	inline typename std::enable_if<Index < 0>::type
-	deleteComponents(const unsigned long b,const std::vector<indexType>& v;){}
+	deleteComponents(const unsigned long b,const std::vector<indexType>& v){}
 
 	entityID nextID;
 	//vector of entities
@@ -183,7 +187,7 @@ private:
 	vectorTuple<components...> componentVectors;
 	//array of index sets used to keep track of discarded components
 	//TODO: might be better to use a deque stack than vectors, consider it
-	std::array<std::std::vector<indexType>,sizeof...(components)> freeComponents;
+	std::array<std::vector<indexType>,sizeof...(components)> freeComponents;
 };
 }
 #endif
