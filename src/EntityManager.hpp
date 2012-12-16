@@ -26,12 +26,13 @@ typedef uint16_t entityID;
  */
 template<size_t maxComponents,class indexType = uint8_t>
 class entity{
-	//friend class EntityManager;
+	template<class T,class... args>
+	friend class EntityManager;
 public:
 	entityID id;
 private:
 
-	explicit entity(const entityID _id):id{_id},mask{},indicies{} {}
+	explicit entity(const entityID _id):id{_id},mask(),indicies() {}
 
 	std::bitset<maxComponents> mask;
 	std::vector<indexType> indicies;
@@ -47,6 +48,8 @@ public:
 	entityID createEntity(){
 		if(freeEntities.empty() == true){
 			nextID++;
+			if(nextID > entities.size())
+				entities.resize(nextID,entity<sizeof...(components),indexType>(nextID - 1));
 			return nextID - 1;
 		}
 		else{
@@ -135,6 +138,7 @@ private:
 
 	friend class EntityManagerTests;
 	FRIEND_TEST(EntityManagerTests,DefaultConstructor);
+	FRIEND_TEST(EntityManagerTests,CreateEntity);
 
 	int onesBelowIndex(const std::bitset<sizeof...(components)> mask,const int index){
 		int acc = 0;

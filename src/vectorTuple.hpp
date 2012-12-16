@@ -106,13 +106,6 @@ struct vectorTuple<T,components...> : private vectorTuple<components...>{
 	//assert each component type satisfies component concept
 	BOOST_CONCEPT_ASSERT((Component<T>));
 
-	/*
-	vectorTuple(const T& f, const components&... rest):
-		vectorTuple<components...>(rest...),_front(f)
-	{
-	}
-	*/
-
 	vectorTuple():vectorTuple<components...>(),_front()
 	{
 	}
