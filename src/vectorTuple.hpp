@@ -5,6 +5,8 @@
 #include <boost/concept/assert.hpp>
 #include "Component.hpp"
 namespace skald{
+template<class... components> struct vectorTuple;
+template<> struct vectorTuple<> {};
 //there's probably a c++11 function to do this already
 //deduces the type of an element in a variadic pack
 template<int index,class... args> struct typeAtIndex;
@@ -44,6 +46,7 @@ template<class... args> struct indexOfType;
 template<class Key,class T,class... args>
 struct indexOfType<Key,T,args...>{
 	static const int index = indexOfType<Key,args...>::index + 1;
+	static_assert(index != 0,"Error, key not in parameter pack");
 };
 
 template<class Key,class... args>
@@ -56,11 +59,11 @@ struct indexOfType<Key,Key>{
 	static const int index = 0;
 };
 
-template<class Key,class T>
-struct indexOfType<Key,T> {
-	static_assert(false,"Error, key not in parameter pack");
+template<class Key>
+struct indexOfType<Key> {
 	static const int index = -1;
 };
+
 /***/
 
 /************************************************************/
@@ -73,7 +76,7 @@ struct getVec{
 		return getVec<index - 1>::template getVal<ret,args...>(v.next());
 	}
 
-	template<class ret,class first,class... args>
+	template<class ret,class front,class... args>
 	static const ret getVal(const vectorTuple<front,args...>& v){
 		return getVec<index - 1>::template getVal<ret,args...>(v.next());
 	}
@@ -83,11 +86,11 @@ template<>
 struct getVec<0>{
 	template<class ret,class... args>
 	static ret getVal(vectorTuple<args...>& v){
-		return v.head();
+		return v.front();
 	}
 	template<class ret,class... args>
 	static const ret getVal(const vectorTuple<args...>& v){
-		return v.head();
+		return v.front();
 	}
 };
 
@@ -96,9 +99,6 @@ struct getVec<0>{
 //A tuple of std::vectors of the given elements
 //getting the type of an std::tuple of vectors of types at compile time
 //turns out to be really hard, so we use our own tuple class
-template<class... components> struct vectorTuple;
-
-template<> struct vectorTuple<> {};
 
 template<class T, class... components>
 struct vectorTuple<T,components...> : private vectorTuple<components...>{
@@ -113,21 +113,21 @@ struct vectorTuple<T,components...> : private vectorTuple<components...>{
 	}
 	*/
 
-	vectorTuple():vectorTuple<components...>{},_front{f}
+	vectorTuple():vectorTuple<components...>(),_front()
 	{
 	}
 
 	//get the vector at index i
 	template<int index>
-	typename typeAtIndex<index,T,components...>::type
+	std::vector<typename typeAtIndex<index,T,components...>::type>
 	get()const{
-		return getVec<index>::template getVal<typename typeAtIndex<index,T,components...>::type,T,components...>(*this);
+		return getVec<index>::template getVal<std::vector<typename typeAtIndex<index,T,components...>::type>,T,components...>(*this);
 	}
 
 	template<int index>
-	typename typeAtIndex<index,T,components...>::type&
+	std::vector<typename typeAtIndex<index,T,components...>::type>&
 	get(){
-		return getVec<index>::template getVal<typename typeAtIndex<index,T,components...>::type,T,components...>(*this);
+		return getVec<index>::template getVal<std::vector<typename typeAtIndex<index,T,components...>::type>&,T,components...>(*this);
 	}
 
 	//get the first vector containing objects of type Key
@@ -141,8 +141,8 @@ struct vectorTuple<T,components...> : private vectorTuple<components...>{
 		return get<indexOfType<Key,components...>::index>();
 	}
 
-	T front()const{return _front;}
-	T& front(){return &_front;}
+	std::vector<T> front()const{return _front;}
+	std::vector<T>& front(){return _front;}
 	const vectorTuple<components...>& next()const{return *this;}
 private:
 	std::vector<T> _front;

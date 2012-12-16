@@ -2,9 +2,9 @@
 #include "EntityManager.hpp"
 
 struct compA{
-	const unsigned long id = 1UL << 0;
+	unsigned long id;
 };
-
+namespace skald{
 class EntityManagerTests : public ::testing::Test{
 protected:
 
@@ -15,7 +15,9 @@ TEST_F(EntityManagerTests,DefaultConstructor){
 	EXPECT_EQ(0,e.nextID);
 	EXPECT_EQ(0,e.entities.size());
 	EXPECT_EQ(0,e.freeEntities.size());
-	EXPECT_EQ(0,e.componentVectors.get<0>().size());
+	auto a = e.componentVectors.template get<0>();
+	EXPECT_EQ(0,a.size());
 	EXPECT_EQ(1,e.freeComponents.size());
-	EXPECT_EQ(0,e.freeComponents.at(0).size())
+	EXPECT_EQ(0,e.freeComponents.at(0).size());
 }
+}//namespace

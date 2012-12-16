@@ -37,7 +37,7 @@ set (${PROJECT_NAME}_TEST_SOURCES
 )
 
 # Test Build Rules
-set (CMAKE_CXX_FLAGS "-std=c++11 -stdlib=libc++ -Wall")
+set (CMAKE_CXX_FLAGS "-std=c++11 -Wall")
 include_directories(${CMAKE_SOURCE_DIR}/src)
 add_executable(testrunner ${${PROJECT_NAME}_TEST_SOURCES})
 target_link_libraries(testrunner gtest gtest_main)

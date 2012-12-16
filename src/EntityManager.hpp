@@ -26,7 +26,7 @@ typedef uint16_t entityID;
  */
 template<size_t maxComponents,class indexType = uint8_t>
 class entity{
-	friend class EntityManager;
+	//friend class EntityManager;
 public:
 	entityID id;
 private:
@@ -41,7 +41,7 @@ template<class indexType = uint8_t,class... components>
 class EntityManager{
 public:
 
-	EntityManager():nextID(0){}
+	EntityManager():nextID{0}{}
 	~EntityManager(){}
 
 	entityID createEntity(){
@@ -53,6 +53,7 @@ public:
 			auto i = freeEntities.begin();
 			entityID e = *i;
 			freeEntities.erase(i);
+			return e;
 		}
 	}
 
@@ -64,7 +65,7 @@ public:
 		if(id == nextID - 1)
 			nextID--;
 		else
-			freeEntities.add(id);
+			freeEntities.insert(id);
 		int acc = 0;
 		for(int i : entities[id].indicies){
 			//this only happens if we've somehow managed to insert an index without
@@ -89,18 +90,18 @@ public:
 		if(id == nextID - 1)
 			nextID--;
 		else
-			freeEntities.add(id);
+			freeEntities.insert(id);
 	}
 
 	//adds a component to the specified entity
 	template <class T>
 	void addComponent(const entityID e,T&& component){
-		auto & v = componentVectors.get<T>();
+		auto & v = componentVectors.template get<T>();
 		auto & f = freeComponents[indexOfType<T>::index];
 		const std::bitset<entities[e].mask.size()> b(std::forward<T>(component).id);
 		entities[e].mask |= b;
 		int acc = 0;
-		for(int i = 0,i < b.size(), ++i){
+		for(int i = 0;i < b.size(); ++i){
 			if(entities[e].mask[i] == true)
 				acc++;
 			if (b[i] == true)
@@ -120,23 +121,26 @@ public:
 	template<class T>
 	void removeComponent(const entityID e,T&& component){
 		int acc = 0;
-		for(acc, acc < entities[e].mask.size(); ++acc)
+		for(acc; acc < entities[e].mask.size(); ++acc)
 			if(std::forward<T>(component).id >> acc == 1)
 				break;
 		int i = onesBelowIndex(entities[e].mask,acc);
 		auto & f = freeComponents[indexOfType<T,components...>::index];
-		auto & v = componentVectors.get<T>();
+		auto & v = componentVectors.template get<T>();
 		f.push_back(entities[e].indicies[i + 1]);
 		entities[e].indicies.erase(i+1);
 		entities[e].mask.reset(acc);
 	}
 private:
 
-	int onesBelowIndex(const std::bitmask<sizeof...(components) mask,const int index){
+	friend class EntityManagerTests;
+	FRIEND_TEST(EntityManagerTests,DefaultConstructor);
+
+	int onesBelowIndex(const std::bitset<sizeof...(components)> mask,const int index){
 		int acc = 0;
-		for(int i = index - 1; i >= 0, --i){
+		for(int i = index - 1; i >= 0; --i){
 			if(mask[i] == true)
-				acc++
+				acc++;
 		}
 		return acc;
 	}
@@ -148,7 +152,7 @@ private:
 	inline typename std::enable_if<Index >= 0>::type
 	deleteComponents(const unsigned long b,const std::vector<indexType>& v){
 		if(b & 1UL<<Index){
-			auto & row = componentVectors.get<Index>();
+			auto & row = componentVectors.template get<Index>();
 			row.erase(v.back());
 			//update entities with new component indicies
 			for(auto e : entities){
@@ -157,7 +161,7 @@ private:
 				//then check if it needs to be updated
 				if (e.mask &= 1UL<<Index){
 					int acc = 0;
-					for(int i = e.mask.size() - 1 ; i > Index, i--){
+					for(int i = e.mask.size() - 1 ; i > Index; i--){
 						if (e.mask[i] == true)
 							acc++;
 					}
