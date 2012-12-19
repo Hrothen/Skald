@@ -1,5 +1,6 @@
 Skald: C++ Entity-Component system
 
 This is a really early work in progress, it doesn't compile,
-it probably has typos, most functions don't even have a prototype,
-and I don't actually know how to use boost:concepts or gtest yet.
+and it probably has typos. The project is intended mainly for my
+own edification as regards template metaprogramming, though of
+course I hope to produce something other people will find useful.

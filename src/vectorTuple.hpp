@@ -2,6 +2,7 @@
 #ifndef VECTOR_TUPLE_HPP
 #define VECTOR_TUPLE_HPP
 #include <vector>
+#include <utility>
 #include <boost/concept/assert.hpp>
 #include "Component.hpp"
 namespace skald{
@@ -25,46 +26,16 @@ struct typeAtIndex<0,T,args...>{
 /************************************************************/
 
 //finds the first occurence of a given type within a variadic pack
-/*
-template<int I,class Key,class T,class... args>
-struct indexOfType<I,Key,T,args...>{
-	static_assert(I < sizeof...(args) + 1, "key not in list");
-	static const int index = indexOfType<I+1,Key,args...>::index;
-};
 
-template<int I,class Key,Key K,class... args>
-struct indexOfType<I,Key,K,args...>{
-	static const int index = I;
-};
-
-template<int I,class... args> struct indexOfType;
-*/
-/***/
-
-template<class... args> struct indexOfType;
+template<class Key>
+constexpr int getIndexOfType(){
+	return 1;
+}
 
 template<class Key,class T,class... args>
-struct indexOfType<Key,T,args...>{
-	static const int index = indexOfType<Key,args...>::index + 1;
-	static_assert(index != 0,"Error, key not in parameter pack");
-};
-
-template<class Key,class... args>
-struct indexOfType<Key,Key,args...>{
-	static const int index = 0;
-};
-
-template<class Key>
-struct indexOfType<Key,Key>{
-	static const int index = 0;
-};
-
-template<class Key>
-struct indexOfType<Key> {
-	static const int index = -1;
-};
-
-/***/
+constexpr int getIndexOfType(){
+	return std::is_same<Key,T>::value ? 0 : getIndexOfType<Key,args...>() + 1;
+}
 
 /************************************************************/
 
@@ -102,6 +73,7 @@ struct getVec<0>{
 
 template<class T, class... components>
 struct vectorTuple<T,components...> : private vectorTuple<components...>{
+	template<int index> using indexedVec = std::vector<typename typeAtIndex<index,T,components...>::type>;
 
 	//assert each component type satisfies component concept
 	BOOST_CONCEPT_ASSERT((Component<T>));
@@ -114,24 +86,32 @@ struct vectorTuple<T,components...> : private vectorTuple<components...>{
 	template<int index>
 	std::vector<typename typeAtIndex<index,T,components...>::type>
 	get()const{
-		return getVec<index>::template getVal<std::vector<typename typeAtIndex<index,T,components...>::type>,T,components...>(*this);
+		//return getVec<index>::template getVal<std::vector<typename typeAtIndex<index,T,components...>::type>,T,components...>(*this);
+		return getVec<index>::template getVal<indexedVec<index>,T,components...>(*this);
 	}
 
 	template<int index>
 	std::vector<typename typeAtIndex<index,T,components...>::type>&
 	get(){
-		return getVec<index>::template getVal<std::vector<typename typeAtIndex<index,T,components...>::type>&,T,components...>(*this);
+		//return getVec<index>::template getVal<std::vector<typename typeAtIndex<index,T,components...>::type>&,T,components...>(*this);
+		return getVec<index>::template getVal<indexedVec<index>&,T,components...>(*this);
 	}
 
 	//get the first vector containing objects of type Key
 	template<class Key>
-	std::vector<Key> get()const{
-		return get<indexOfType<Key,components...>::index>();
+	std::vector<Key> getByType()const{
+		constexpr int index = getIndexOfType<Key,components...>();
+		static_assert(index < sizeof...(components),
+			"Compilation error, requested type not found in the list of components");
+		return get<index>();
 	}
 
 	template<class Key>
-	std::vector<Key>& get(){
-		return get<indexOfType<Key,components...>::index>();
+	std::vector<Key>& getByType(){
+		constexpr int index = getIndexOfType<Key,components...>();
+		static_assert(index < sizeof...(components),
+			"Compilation error, requested type not found in the list of components");
+		return get<index>();
 	}
 
 	std::vector<T> front()const{return _front;}
@@ -141,5 +121,5 @@ private:
 	std::vector<T> _front;
 };
 
-}
+}//namespace
 #endif

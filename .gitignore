@@ -4,5 +4,9 @@ vendor/gtest/*
 #ignore builds
 build/*
 
+#ignore sublime project files
+*.sublime-project
+*.sublime-workspace
+
 #ignore objects and archives
 *.[oa]

@@ -25,14 +25,20 @@ typedef uint16_t entityID;
  * be a bit low for some users.
  */
 template<size_t maxComponents,class indexType = uint8_t>
-class entity{
+class Entity{
 	template<class T,class... args>
 	friend class EntityManager;
 public:
 	entityID id;
 private:
 
-	explicit entity(const entityID _id):id{_id},mask(),indicies() {}
+	FRIEND_TEST(EntityManagerTests,PurgeEntity);
+	explicit Entity(const entityID _id):id{_id},mask(),indicies() {}
+
+	inline void clear(){
+		mask.reset();
+		indicies.clear();
+	}
 
 	std::bitset<maxComponents> mask;
 	std::vector<indexType> indicies;
@@ -41,6 +47,7 @@ private:
 template<class indexType = uint8_t,class... components>
 class EntityManager{
 public:
+	typedef Entity<sizeof...(components),indexType> entity;
 
 	EntityManager():nextID{0}{}
 	~EntityManager(){}
@@ -49,7 +56,7 @@ public:
 		if(freeEntities.empty() == true){
 			nextID++;
 			if(nextID > entities.size())
-				entities.resize(nextID,entity<sizeof...(components),indexType>(nextID - 1));
+				entities.resize(nextID,entity(nextID - 1));
 			return nextID - 1;
 		}
 		else{
@@ -80,16 +87,18 @@ public:
 			//manager in order by their id field
 			freeComponents[acc].push_back(i);
 		}
-		entities[id].mask.reset();
-		entities[id].indicies.clear();
+		//entities[id].mask.reset();
+		//entities[id].indicies.clear();
+		entities[id].clear();
 	}
 
 	//deletes an entity's components from the pool and discards it
 	//only use this if you really need the components removed, it's slow
 	void purgeEntity(const entityID id){
 		deleteComponents(entities[id].mask.to_ulong(),entities[id].indicies);
-		entities[id].mask.reset();
-		entities[id].indicies.clear();
+		//entities[id].mask.reset();
+		//entities[id].indicies.clear();
+		entities[id].clear();
 		if(id == nextID - 1)
 			nextID--;
 		else
@@ -99,11 +108,11 @@ public:
 	//adds a component to the specified entity
 	template <class T>
 	void addComponent(const entityID e,T&& component){
-		auto & v = componentVectors.template get<T>();
-		auto & f = freeComponents[indexOfType<T>::index];
-		const std::bitset<entities[e].mask.size()> b(std::forward<T>(component).id);
+		auto & v = componentVectors.template getByType<T>();
+		auto & f = freeComponents[getIndexOfType<T,components...>()];
+		const std::bitset<sizeof...(components)> b(std::forward<T>(component).id);
 		entities[e].mask |= b;
-		int acc = 0;
+		auto acc = entities[e].indicies.begin();
 		for(int i = 0;i < b.size(); ++i){
 			if(entities[e].mask[i] == true)
 				acc++;
@@ -128,17 +137,23 @@ public:
 			if(std::forward<T>(component).id >> acc == 1)
 				break;
 		int i = onesBelowIndex(entities[e].mask,acc);
-		auto & f = freeComponents[indexOfType<T,components...>::index];
+		auto & f = freeComponents[getIndexOfType<T,components...>()];
 		auto & v = componentVectors.template get<T>();
 		f.push_back(entities[e].indicies[i + 1]);
 		entities[e].indicies.erase(i+1);
 		entities[e].mask.reset(acc);
 	}
 private:
-
+	//gtest friend declarations so we can access private members in tests
 	friend class EntityManagerTests;
 	FRIEND_TEST(EntityManagerTests,DefaultConstructor);
 	FRIEND_TEST(EntityManagerTests,CreateEntity);
+	FRIEND_TEST(EntityManagerTests,RemoveEntity);
+	FRIEND_TEST(EntityManagerTests,PurgeEntity);
+	FRIEND_TEST(EntityManagerTests,ReuseEntity);
+	FRIEND_TEST(EntityManagerTests,AddComponent);
+	FRIEND_TEST(EntityManagerTests,RemoveComponent);
+
 
 	int onesBelowIndex(const std::bitset<sizeof...(components)> mask,const int index){
 		int acc = 0;
@@ -154,16 +169,18 @@ private:
 	//index vectors point to the right component
 	template<unsigned int Index = sizeof...(components) - 1>
 	inline typename std::enable_if<Index >= 0>::type
-	deleteComponents(const unsigned long b,const std::vector<indexType>& v){
+	deleteComponents(const unsigned long b,std::vector<indexType>& v){
 		if(b & 1UL<<Index){
 			auto & row = componentVectors.template get<Index>();
-			row.erase(v.back());
+			auto iter = row.begin();
+			std::advance(iter,v.back());
+			row.erase(iter);
 			//update entities with new component indicies
 			for(auto e : entities){
 				//this is pretty ugly, we need to check if each entity
 				//has the component, then work out where it is in the tuple,
 				//then check if it needs to be updated
-				if (e.mask &= 1UL<<Index){
+				if (e.mask[Index] == true){
 					int acc = 0;
 					for(int i = e.mask.size() - 1 ; i > Index; i--){
 						if (e.mask[i] == true)
@@ -188,7 +205,7 @@ private:
 
 	entityID nextID;
 	//vector of entities
-	std::vector<entity<sizeof...(components),indexType>> entities;
+	std::vector<entity> entities;
 	//set of entityIDs that have been discarded and can be reused
 	std::set<entityID> freeEntities;
 	//tuple of vectors of components
