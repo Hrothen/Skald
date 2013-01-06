@@ -56,18 +56,11 @@ TEST_F(EntityManagerTests,PurgeEntity){
 TEST_F(EntityManagerTests,ReuseEntity){}
 TEST_F(EntityManagerTests,AddComponent){
 	auto i = e.createEntity();
+	ASSERT_EQ(0,static_cast<int>(i));
+	ASSERT_EQ(true,e.freeComponents.at(find_first<VectorTuple<compA>,compA>::value).empty());
 	compA a {1UL};
 	e.addComponent(i,compA(a));
 }
 TEST_F(EntityManagerTests,RemoveComponent){}
 
-TEST(VectorTupleTests,GetIndex){
-	int i = getIndexOfType<int,char,bool,int>();
-	EXPECT_EQ(2,i);
-	int j = getIndexOfType<int,char,char,char>();
-	EXPECT_EQ(4,j);
-	vectorTuple<compA> v;
-	auto & a = v.template get<0>();
-	//std::vector<compA> & a = v.template getByType<compA>();
-}
 }//namespace

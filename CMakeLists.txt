@@ -16,7 +16,7 @@ set (${PROJECT_NAME}_SOURCES
     src/System.hpp
     src/SystemManager.hpp
     src/World.hpp
-    src/vectorTuple.hpp
+    src/VectorTuple.hpp
 )
 
 # Google Test Integration
@@ -34,6 +34,7 @@ include_directories(
 set (${PROJECT_NAME}_TEST_SOURCES
     test/runAllTests.cpp
     test/entityTests.cpp
+    test/vectorTupleTests.cpp
 )
 
 # Test Build Rules

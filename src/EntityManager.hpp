@@ -10,7 +10,7 @@
 #include <set>
 #include <type_traits>
 #include "Components.hpp"
-#include "vectorTuple.hpp"
+#include "VectorTuple.hpp"
 
 namespace skald{
 typedef uint16_t entityID;
@@ -48,6 +48,8 @@ template<class indexType = uint8_t,class... components>
 class EntityManager{
 public:
 	typedef Entity<sizeof...(components),indexType> entity;
+	template<class Key>
+	using getTypeIndex = find_first<VectorTuple<components...>,Key>;
 
 	EntityManager():nextID{0}{}
 	~EntityManager(){}
@@ -109,8 +111,8 @@ public:
 	template <class T>
 	void addComponent(const entityID e,T&& component){
 		auto & v = componentVectors.template getByType<T>();
-		auto & f = freeComponents[getIndexOfType<T,components...>()];
-		const std::bitset<sizeof...(components)> b(std::forward<T>(component).id);
+		auto & f = freeComponents[getTypeIndex<T>::value];
+		const std::bitset<sizeof...(components)> b(static_cast<int>(std::forward<T>(component).id));
 		entities[e].mask |= b;
 		auto acc = entities[e].indicies.begin();
 		for(int i = 0;i < b.size(); ++i){
@@ -126,7 +128,11 @@ public:
 		}
 		else{
 			v.push_back(component);
-			entities[e].indicies.insert(acc,v.size());
+			//this probably has some edge cases that aren't occuring to me
+			if(entities[e].indicies.size() == 0)
+				entities[e].indicies.push_back(v.size());
+			else
+				entities[e].indicies.insert(acc,v.size());
 		}
 	}
 
@@ -137,8 +143,8 @@ public:
 			if(std::forward<T>(component).id >> acc == 1)
 				break;
 		int i = onesBelowIndex(entities[e].mask,acc);
-		auto & f = freeComponents[getIndexOfType<T,components...>()];
-		auto & v = componentVectors.template get<T>();
+		auto & f = freeComponents[getTypeIndex<T>::value];
+		auto & v = componentVectors.template getByType<T>();
 		f.push_back(entities[e].indicies[i + 1]);
 		entities[e].indicies.erase(i+1);
 		entities[e].mask.reset(acc);
@@ -209,7 +215,7 @@ private:
 	//set of entityIDs that have been discarded and can be reused
 	std::set<entityID> freeEntities;
 	//tuple of vectors of components
-	vectorTuple<components...> componentVectors;
+	VectorTuple<components...> componentVectors;
 	//array of index sets used to keep track of discarded components
 	//TODO: might be better to use a deque stack than vectors, consider it
 	std::array<std::vector<indexType>,sizeof...(components)> freeComponents;
