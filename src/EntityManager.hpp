@@ -9,7 +9,6 @@
 #include <utility>
 #include <set>
 #include <type_traits>
-#include "Components.hpp"
 #include "VectorTuple.hpp"
 
 namespace skald{
@@ -34,6 +33,8 @@ private:
 
 	FRIEND_TEST(EntityManagerTests,PurgeEntity);
 	FRIEND_TEST(EntityManagerTests,CreateEntity);
+	FRIEND_TEST(EntityManagerTests,AddComponent);
+	FRIEND_TEST(EntityManagerTests,RemoveComponent);
 	explicit Entity(const entityID _id):id{_id},mask(),indicies{} {}
 
 	inline void clear(){

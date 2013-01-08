@@ -85,7 +85,22 @@ TEST_F(EntityManagerTests,AddComponent){
 	e.addComponent(i,a);
 	e.addComponent(i,b);
 	e.addComponent(i,c);
+	EXPECT_EQ(0,e.entities[i].indicies[0]);
+	EXPECT_EQ(0,e.entities[i].indicies[1]);
+	EXPECT_EQ(0,e.entities[i].indicies[2]);
+	auto j = e.createEntity();
+	compA a2 {1UL << 0};
+	compB b2 {1UL << 1,6};
+	compC c2 {1UL << 2,9,10};
+	e.addComponent(j,a2);
+	e.addComponent(j,b2);
+	e.addComponent(j,c2);
+	EXPECT_EQ(1,e.entities[j].indicies[0]);
+	EXPECT_EQ(1,e.entities[j].indicies[1]);
+	EXPECT_EQ(1,e.entities[j].indicies[2]);
 }
-TEST_F(EntityManagerTests,RemoveComponent){}
+TEST_F(EntityManagerTests,RemoveComponent){
+	auto i = e.createEntity();
+}
 
 }//namespace
