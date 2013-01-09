@@ -62,18 +62,22 @@ TEST_F(EntityManagerTests,RemoveEntity){
 	ASSERT_EQ(1,e.freeEntities.size());
 }
 TEST_F(EntityManagerTests,PurgeEntity){
-	/*
 	auto i = e.createEntity();
 	auto j = e.createEntity();
 	compA a,b;
 	a.id = b.id = 1UL;
-	e.addComponent(i,compA(a));
-	e.addComponent(j,compA(b));
+	e.addComponent(i,a);
+	e.addComponent(j,b);
 	EXPECT_EQ(0,e.entities[i].indicies[0]);
 	EXPECT_EQ(1,e.entities[j].indicies[0]);
+	EXPECT_EQ(true,e.entities[i].mask[0]);
+	EXPECT_EQ(true,e.entities[j].mask[0]);
 	e.purgeEntity(i);
+	auto & v = e.componentVectors.template get<0>();
+	EXPECT_EQ(1,v.size());
+	EXPECT_EQ(1,e.freeEntities.size());
+	EXPECT_EQ(0,e.freeComponents[0].size());
 	EXPECT_EQ(0,e.entities[j].indicies[0]);
-	*/
 }
 TEST_F(EntityManagerTests,ReuseEntity){}
 TEST_F(EntityManagerTests,AddComponent){
@@ -100,7 +104,29 @@ TEST_F(EntityManagerTests,AddComponent){
 	EXPECT_EQ(1,e.entities[j].indicies[2]);
 }
 TEST_F(EntityManagerTests,RemoveComponent){
+	EXPECT_EQ(0,e.freeComponents[0].size());
+	EXPECT_EQ(0,e.freeComponents[1].size());
+	EXPECT_EQ(0,e.freeComponents[2].size());
 	auto i = e.createEntity();
+	auto j = e.createEntity();
+	compA a {1UL};
+	compB b {2UL,2};
+	compC c {4UL,3,4};
+	e.addComponent(i,a);
+	e.addComponent(i,b);
+	e.addComponent(i,c);
+	e.addComponent(j,a);
+	e.addComponent(j,b);
+	e.addComponent(j,c);
+	e.removeComponent(i,a);
+	e.removeComponent(i,b);
+	e.removeComponent(i,c);
+	EXPECT_EQ(1,e.entities[j].indicies[0]);
+	EXPECT_EQ(1,e.entities[j].indicies[1]);
+	EXPECT_EQ(1,e.entities[j].indicies[2]);
+	EXPECT_EQ(1,e.freeComponents[0].size());
+	EXPECT_EQ(1,e.freeComponents[1].size());
+	EXPECT_EQ(1,e.freeComponents[2].size());
 }
 
 }//namespace

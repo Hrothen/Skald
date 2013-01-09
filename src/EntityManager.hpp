@@ -91,7 +91,8 @@ public:
 	//deletes an entity's components from the pool and discards it
 	//only use this if you really need the components removed, it's slow
 	void purgeEntity(const entityID id){
-		deleteComponents(entities[id].mask,entities[id].indicies);
+		//deleteComponents(entities[id].mask,entities[id].indicies);
+		deleteComponents(id);
 		entities[id].clear();
 		if(id == nextID - 1)
 			nextID--;
@@ -127,7 +128,6 @@ public:
 	void removeComponent(const entityID e,T component){
 		const int componentIndex = getTypeIndex<T>::value;
 		auto & f = freeComponents[componentIndex];
-		auto & v = componentVectors.template getByType<T>();
 		f.push_back(entities[e].indicies[componentIndex]);
 		//Zero is still a valid component index, which is unfortunate.
 		//I could deal with this by using signed ints, but then
@@ -148,64 +148,52 @@ private:
 	FRIEND_TEST(EntityManagerTests,AddComponent);
 	FRIEND_TEST(EntityManagerTests,RemoveComponent);
 
-	/*
-	int onesBelowIndex(const std::bitset<sizeof...(components)> mask,const int index){
-		int acc = 0;
-		for(int i = index - 1; i >= 0; --i){
-			if(mask[i] == true)
-				acc++;
-		}
-		return acc;
-	}
-	*/
 
 	//takes a bitmask and a vector of indicies and deletes all the corresponding
 	//components from their lists, also updates the other entities so their
 	//index vectors point to the right component
 	template<unsigned int Index = sizeof...(components) - 1>
-	inline typename std::enable_if<(Index > 0),void>::type
-	deleteComponents(const std::bitset<sizeof...(components)>& b,
-					std::array<indexType,sizeof...(components)>& indicies){
-		if(b[Index] == true){
+	inline typename std::enable_if<(Index > 0)>::type
+	deleteComponents(const entityID id){
+		if(entities[id].mask[Index] == true){
 			auto & row = componentVectors.template get<Index>();
 			auto iter = row.begin();
-			std::advance(iter,indicies[Index]);
+			std::advance(iter,entities[id].indicies[Index]);
 			row.erase(iter);
 
 			//update entities with the new component indicies
-			for(auto e : entities){
+			for(auto & e : entities){
 				//for each entity, if the entity has the component and its
 				//index is greater than the index of the removed component
 				//we decrement that index by one
-				if(e.mask[Index] == true){
-					if(e.indicies[Index] > indicies[Index])
-						e.indicies[Index]--;
-				}
+				if(e.mask[Index] == true &&
+					e.indicies[Index] > entities[id].indicies[Index] &&
+					e.id != id)
+						e.indicies[Index] -= 1;
 			}
 		}
-		deleteComponents<Index - 1>(b,indicies);
+		deleteComponents<Index - 1>(id);
 	}
 
 	//Base function to end the recursive template
 	template<unsigned int Index>
-	inline typename std::enable_if<Index == 0,void>::type
-	deleteComponents(const std::bitset<sizeof...(components)>& b,
-					std::array<indexType,sizeof...(components)>& indicies){
-		if(b[Index] == true){
+	inline typename std::enable_if<(Index == 0)>::type
+	deleteComponents(const entityID id){
+		if(entities[id].mask[Index] == true){
 			auto & row = componentVectors.template get<Index>();
 			auto iter = row.begin();
-			std::advance(iter,indicies[Index]);
+			std::advance(iter,entities[id].indicies[Index]);
 			row.erase(iter);
 
 			//update entities with the new component indicies
-			for(auto e : entities){
+			for(auto & e : entities){
 				//for each entity, if the entity has the component and its
 				//index is greater than the index of the removed component
 				//we decrement that index by one
-				if(e.mask[Index] == true){
-					if(e.indicies[Index] > indicies[Index])
-						e.indicies[Index]--;
-				}
+				if(e.mask[Index] == true &&
+					e.indicies[Index] > entities[id].indicies[Index] &&
+					e.id != id)
+						e.indicies[Index] -= 1;
 			}
 		}
 	}
@@ -221,5 +209,5 @@ private:
 	//TODO: might be better to use a deque stack than vectors, consider it
 	std::array<std::vector<indexType>,sizeof...(components)> freeComponents;
 };
-}
+}//namespace
 #endif
