@@ -35,6 +35,7 @@ set (${PROJECT_NAME}_TEST_SOURCES
     test/runAllTests.cpp
     test/entityTests.cpp
     test/vectorTupleTests.cpp
+    test/systemTests.cpp
 )
 
 # Test Build Rules

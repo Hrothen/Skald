@@ -79,7 +79,17 @@ TEST_F(EntityManagerTests,PurgeEntity){
 	EXPECT_EQ(0,e.freeComponents[0].size());
 	EXPECT_EQ(0,e.entities[j].indicies[0]);
 }
-TEST_F(EntityManagerTests,ReuseEntity){}
+TEST_F(EntityManagerTests,ReuseEntity){
+	auto i = e.createEntity();
+	auto j = e.createEntity();
+	EXPECT_EQ(0,i);
+	EXPECT_EQ(1,j);
+	e.removeEntity(i);
+	EXPECT_EQ(1,j);
+	auto k = e.createEntity();
+	EXPECT_EQ(0,k);
+	EXPECT_EQ(1,j);
+}
 TEST_F(EntityManagerTests,AddComponent){
 	auto i = e.createEntity();
 	ASSERT_EQ(0,static_cast<int>(i));

@@ -12,22 +12,23 @@
 #include "VectorTuple.hpp"
 
 namespace skald{
-typedef uint16_t entityID;
+//typedef uint16_t entityID;
 
 /*
  * Class representing an entity in the system.
  * For the template parameters, maxComponents is
  * the total number of component classes, while
  * indexType is the smallest integer type that can
- * index the maximum number of entities in the game
- * the default is one byte, allowing 256 entities, which might
- * be a bit low for some users.
+ * index the maximum number of entities in the game.
  */
-template<size_t maxComponents,class indexType = uint8_t>
+template<size_t maxComponents,class indexType>
 class Entity{
+	static_assert(std::is_unsigned<indexType>::value == true,
+		"indexType must be an unsigned arithmetic type");
 	template<class T,class... args>
 	friend class EntityManager;
 public:
+	typedef indexType entityID;
 	entityID id;
 private:
 
@@ -45,11 +46,22 @@ private:
 	std::bitset<maxComponents> mask;
 	std::array<indexType,maxComponents> indicies;
 };
-
-template<class indexType = uint8_t,class... components>
+/*
+ * Class handling a list of entities and all their components.
+ * The first template parameter should be the indexing type for
+ * your entities, chosen based on the maximum number of entites
+ * you plan to have, for instance if you know you'll never need
+ * more than 256 entities you can use uint8_t. The remaining
+ * template parameters should consist of every component class
+ * you intend to use.
+ */
+template<class indexType,class... components>
 class EntityManager{
 public:
+	static_assert(std::is_unsigned<indexType>::value == true,
+		"indexType must be an unsigned arithmetic type");
 	typedef Entity<sizeof...(components),indexType> entity;
+	typedef indexType entityID;
 	template<class Key>
 	using getTypeIndex = find_first<VectorTuple<components...>,Key>;
 
@@ -166,9 +178,9 @@ private:
 				//for each entity, if the entity has the component and its
 				//index is greater than the index of the removed component
 				//we decrement that index by one
-				if(e.mask[Index] == true &&
-					e.indicies[Index] > entities[id].indicies[Index] &&
-					e.id != id)
+				if(e.id != id
+					&& e.mask[Index] == true
+					&& e.indicies[Index] > entities[id].indicies[Index])
 						e.indicies[Index] -= 1;
 			}
 		}
@@ -190,9 +202,9 @@ private:
 				//for each entity, if the entity has the component and its
 				//index is greater than the index of the removed component
 				//we decrement that index by one
-				if(e.mask[Index] == true &&
-					e.indicies[Index] > entities[id].indicies[Index] &&
-					e.id != id)
+				if(e.id != id
+					&& e.mask[Index] == true
+					&& e.indicies[Index] > entities[id].indicies[Index])
 						e.indicies[Index] -= 1;
 			}
 		}

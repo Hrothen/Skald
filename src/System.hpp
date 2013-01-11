@@ -7,10 +7,14 @@ namespace skald{
 class System{
 public:
 	System(int p,int t):priority(p),threadGroup(t){};
-	~System();
+	~System(){}
+
+	//not copyable
+	System(const System&) = delete;
+	System& operator=(const System&) = delete;
 
 	//unique identifier for each system class
-	const int getID()const{return id;}
+	virtual const int id()const = 0;
 
 	//init is called once, when the system is registered with the manager
 	virtual void init() = 0;
@@ -25,8 +29,6 @@ public:
 protected:
 	int priority;		//priority of the system in the queue, lower values are run first
 	int threadGroup;	//thread group the system belongs to
-private:
-	const int id = 0;
 };
-}
+}//namespace
 #endif

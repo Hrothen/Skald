@@ -9,10 +9,11 @@ namespace skald{
 
 //controller class holding the system manager and entity manager
 //this class is the user's interface into the entity-component system
-template<class indexType = uint8_t,class... components>
+template<class indexType,class... components>
 class World
 {
 public:
+	typedef indexType entityID;
 	World(){}
 	~World(){}
 
@@ -55,5 +56,5 @@ private:
 	SystemManager systems;
 	EntityManager<indexType,components...> entities;
 };
-}
+}//namespace
 #endif

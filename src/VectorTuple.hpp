@@ -26,6 +26,9 @@ struct typeAtIndex<0,T,args...>{
 
 /************************************************************/
 
+//found this code on stackoverflow at
+//http://stackoverflow.com/questions/6032089/position-of-a-type-in-a-variadic-template-parameter-pack/6032645#6032645
+
 //find_first has an element value holding the index of the first element
 //of type T in the paramter pack of the given Tuple type
 
