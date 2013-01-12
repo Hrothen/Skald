@@ -31,21 +31,21 @@ public:
 	}
 
 	template<class T>
-	inline void removeComponent(const entityID e,T&& c){
-		entities.removeComponent(e,std::forward<T>(c));
+	inline void removeComponent(const entityID e){
+		entities.removeComponent<T>(e);
 	}
 
-	inline void addSystem(const System& s){
-		systems.addSystem(s);
-		s.init();
+	inline void addSystem(const std::shared_ptr<System> s){
+		systems.add(s);
+		s->init();
 	}
 
-	inline void removeSystem(const System& s){
+	inline void removeSystem(const std::shared_ptr<System> s){
 		systems.remove(s);
-		s.destroy();
+		s->destroy();
 	}
 
-	inline System& getSystem(const int id){
+	inline std::shared_ptr<System> getSystem(const int id){
 		return systems.get(id);
 	}
 

@@ -4,9 +4,8 @@
 #include <vector>
 #include <algorithm>
 #include <memory>
+#include "System.hpp"
 namespace skald{
-
-class System;
 
 struct Comparator{
 	bool operator()(const std::shared_ptr<System> a,const std::shared_ptr<System> b){

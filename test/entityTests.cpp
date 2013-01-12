@@ -128,9 +128,9 @@ TEST_F(EntityManagerTests,RemoveComponent){
 	e.addComponent(j,a);
 	e.addComponent(j,b);
 	e.addComponent(j,c);
-	e.removeComponent(i,a);
-	e.removeComponent(i,b);
-	e.removeComponent(i,c);
+	e.removeComponent<compA>(i);
+	e.removeComponent<compB>(i);
+	e.removeComponent<compC>(i);
 	EXPECT_EQ(1,e.entities[j].indicies[0]);
 	EXPECT_EQ(1,e.entities[j].indicies[1]);
 	EXPECT_EQ(1,e.entities[j].indicies[2]);

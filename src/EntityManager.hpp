@@ -136,8 +136,9 @@ public:
 		}
 	}
 
+	//removes a component of type T from the specified entity
 	template<class T>
-	void removeComponent(const entityID e,T component){
+	void removeComponent(const entityID e){
 		const int componentIndex = getTypeIndex<T>::value;
 		auto & f = freeComponents[componentIndex];
 		f.push_back(entities[e].indicies[componentIndex]);
