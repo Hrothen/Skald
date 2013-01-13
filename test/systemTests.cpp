@@ -1,13 +1,7 @@
 #include <gtest/gtest.h>
-#include "World.hpp"
+#include "tests_shared.hpp"
 
 namespace skald{
-
-struct compA{};
-struct compB{};
-struct compC{};
-
-typedef World<uint8_t,compA,compB,compC> testWorld;
 
 class TestSystem1 : public testWorld::SystemBase{
 public:
@@ -56,7 +50,6 @@ protected:
 	SystemManager<uint8_t,compA,compB,compC> manager;
 };
 
-typedef typename testWorld::SystemPtr sysPtr;
 
 TEST_F(SystemTests,AddSystem){
 	EXPECT_EQ(0,manager.systems.size());

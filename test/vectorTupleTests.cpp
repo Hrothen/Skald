@@ -1,20 +1,7 @@
 #include <gtest/gtest.h>
-#include "VectorTuple.hpp"
+#include "tests_shared.hpp"
 
-struct compA{
-	unsigned long id;
-};
-
-struct compB{
-	unsigned long id;
-	int first;
-};
-
-struct compC{
-	unsigned long id;
-	int first;
-	int second;
-};
+namespace skald{
 
 TEST(VectorTupleTests,FindFirst){
 	typedef skald::VectorTuple<compA,compB,compC> tup;
@@ -40,3 +27,4 @@ TEST(VectorTupleTests,GetByType){
 	i.push_back(b);
 	ASSERT_EQ(7,v.getByType<compB>().at(0).first);
 }
+}//namespace

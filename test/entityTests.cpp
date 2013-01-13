@@ -1,20 +1,5 @@
 #include <gtest/gtest.h>
-#include "EntityManager.hpp"
-
-struct compA{
-	unsigned long id;
-};
-
-struct compB{
-	unsigned long id;
-	int first;
-};
-
-struct compC{
-	unsigned long id;
-	int first;
-	int second;
-};
+#include "tests_shared.hpp"
 
 namespace skald{
 class EntityManagerTests : public ::testing::Test{
