@@ -15,7 +15,7 @@ class World
 public:
 	typedef indexType entityID;
 	typedef typename SystemManager<indexType,components...>::SystemPtr SystemPtr;
-	typedef System<indexType,components...> sysType;
+	typedef System<indexType,components...> SystemBase;
 	World(){}
 	~World(){}
 

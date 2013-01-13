@@ -9,7 +9,7 @@ struct compC{};
 
 typedef World<uint8_t,compA,compB,compC> testWorld;
 
-class TestSystem1 : public testWorld::sysType{
+class TestSystem1 : public testWorld::SystemBase{
 public:
 	TestSystem1(int p,int t):System(p,t),testVal(0){}
 	~TestSystem1(){}
@@ -22,7 +22,7 @@ public:
 	}
 };
 
-class TestSystem2 : public testWorld::sysType{
+class TestSystem2 : public testWorld::SystemBase{
 public:
 	TestSystem2(int p,int t):System(p,t),testVal(0){}
 	~TestSystem2(){}
@@ -35,7 +35,7 @@ public:
 	}
 };
 
-class TestSystem3 : public testWorld::sysType{
+class TestSystem3 : public testWorld::SystemBase{
 public:
 	TestSystem3(int p,int t):System(p,t),testVal(0){}
 	~TestSystem3(){}

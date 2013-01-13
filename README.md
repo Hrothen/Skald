@@ -10,14 +10,14 @@ Objects in Skald are either Entities, Components, or Systems. Entities are used 
 
 The following are required to use Skald:
 
--A reasonably new compiler such as clang3.1 or gcc4.7, technically the latest visual c++ compiler should work, but their standard library hasn't been updated yet and I haven't tested it.
--[Boost](http://boost.org) `1.48.0` or higher. Boost Concepts is used to enforce POD requirements on components. If you don't want to link against boost you can alternately remove the concept check and include directive in VectorTuple.hpp.
+- A reasonably new compiler such as clang3.1 or gcc4.7, technically the latest visual c++ compiler should work, but their standard library hasn't been updated yet and I haven't tested it.
+- [Boost](http://boost.org) `1.48.0` or higher. Boost Concepts is used to enforce POD requirements on components. If you don't want to link against boost you can alternately remove the concept check and include directive in VectorTuple.hpp.
 
 To build the tests you will additionally need:
 
--[CMake](http://cmake.org/)
--[SVN](http://subversion.apache.org/)
--[GTest](http://code.google.com/p/googletest/) Which you can install via the build script.
+- [CMake](http://cmake.org/)
+- [SVN](http://subversion.apache.org/)
+- [GTest](http://code.google.com/p/googletest/) Which you can install via the build script.
 
 To actually build the tests do:
 
