@@ -1,6 +1,0 @@
-Skald: C++ Entity-Component system
-
-This is a really early work in progress, it doesn't compile,
-and it probably has typos. The project is intended mainly for my
-own edification as regards template metaprogramming, though of
-course I hope to produce something other people will find useful.

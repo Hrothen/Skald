@@ -3,10 +3,13 @@
 #define SKALD_SYSTEM_HPP
 namespace skald{
 
+template<class T,class... args> class World;
+
 //Abstract base class for systems
+template<class T,class... args>
 class System{
 public:
-	System(int p,int t):priority(p),threadGroup(t){};
+	System(int p,int t):priority(p),threadGroup(t){}
 	~System(){}
 
 	//not copyable
@@ -17,9 +20,9 @@ public:
 	virtual const int id()const = 0;
 
 	//init is called once, when the system is registered with the manager
-	virtual void init() = 0;
+	virtual void init(World<T,args...> *) = 0;
 	//destroy is called once, when the system is removed from the manager
-	virtual void destroy() = 0;
+	virtual void destroy(World<T,args...> *) = 0;
 	//update is called every cycle
 	virtual void update(const double) = 0;
 	//sets the priority

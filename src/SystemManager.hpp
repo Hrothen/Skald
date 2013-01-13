@@ -7,28 +7,31 @@
 #include "System.hpp"
 namespace skald{
 
+template<class sys>
 struct Comparator{
-	bool operator()(const std::shared_ptr<System> a,const std::shared_ptr<System> b){
+	bool operator()(const sys a,const sys b){
 		return a->getPriority() < b->getPriority();
 	}
-	bool operator()(const std::shared_ptr<System> a,const int b){
+	bool operator()(const sys a,const int b){
 		return a->getPriority() < b;
 	}
 };
 
 //this class manages an ordered list of systems
-//IMPORTANT: SystemManager does not own any of the systems it manages
 //TODO: system pools for threading
+template<class... args>
 class SystemManager{
 public:
+	typedef std::shared_ptr<System<args...>> SystemPtr;
 	SystemManager():systems(0),lockSystems(false){}
 	~SystemManager(){}
 
 	bool canModify()const{return lockSystems;}
 
 	//adds a system to the manager
-	void add(const std::shared_ptr<System> s){
-		auto i = std::upper_bound(systems.begin(),systems.end(),s,Comparator());
+	void add(const SystemPtr s){
+		auto i = std::upper_bound(systems.begin(),systems.end(),
+			s,Comparator<SystemPtr>());
 		if(i == systems.begin())
 			systems.insert(i,s);
 		else{
@@ -41,14 +44,16 @@ public:
 	}
 
 	//removes a system from the manager
-	void remove(const std::shared_ptr<System> s){
-		auto i = std::lower_bound(systems.begin(),systems.end(),s,Comparator());
+	void remove(const SystemPtr s){
+		auto i = std::lower_bound(systems.begin(),systems.end(),
+			s,Comparator<SystemPtr>());
 		if(i != systems.end())
 			systems.erase(i);
 	}
 
 	void remove(const int id){
-		auto i = std::lower_bound(systems.begin(),systems.end(),id,Comparator());
+		auto i = std::lower_bound(systems.begin(),systems.end(),
+			id,Comparator<SystemPtr>());
 		if(i != systems.end())
 			systems.erase(i);
 	}
@@ -61,7 +66,7 @@ public:
 		lockSystems = false;
 	}
 
-	std::shared_ptr<System> get(const int id){
+	SystemPtr get(const int id){
 		for(auto S : systems)
 			if(S->id() == id)
 				return S;
@@ -77,7 +82,7 @@ private:
 	FRIEND_TEST(SystemTests,Get);
 
 	//vector of system pointers, sorted by priority
-	std::vector<std::shared_ptr<System>> systems;
+	std::vector<SystemPtr> systems;
 	//during an update loop we don't want to allow outside access to the system list
 	//TODO: this should be a mutex
 	bool lockSystems;

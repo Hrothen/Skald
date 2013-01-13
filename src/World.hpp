@@ -14,6 +14,8 @@ class World
 {
 public:
 	typedef indexType entityID;
+	typedef typename SystemManager<indexType,components...>::SystemPtr SystemPtr;
+	typedef System<indexType,components...> sysType;
 	World(){}
 	~World(){}
 
@@ -35,17 +37,17 @@ public:
 		entities.removeComponent<T>(e);
 	}
 
-	inline void addSystem(const std::shared_ptr<System> s){
+	inline void addSystem(const SystemPtr s){
 		systems.add(s);
-		s->init();
+		s->init(*this);
 	}
 
-	inline void removeSystem(const std::shared_ptr<System> s){
+	inline void removeSystem(const SystemPtr s){
 		systems.remove(s);
-		s->destroy();
+		s->destroy(*this);
 	}
 
-	inline std::shared_ptr<System> getSystem(const int id){
+	inline SystemPtr getSystem(const int id){
 		return systems.get(id);
 	}
 
@@ -53,7 +55,7 @@ public:
 		systems.update(t);
 	}
 private:
-	SystemManager systems;
+	SystemManager<indexType,components...> systems;
 	EntityManager<indexType,components...> entities;
 };
 }//namespace
