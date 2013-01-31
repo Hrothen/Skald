@@ -29,27 +29,28 @@ class Entity{
 	friend class EntityManager;
 public:
 	typedef indexType entityID;
-	entityID id;
-private:
-
-	FRIEND_TEST(EntityManagerTests,PurgeEntity);
-	FRIEND_TEST(EntityManagerTests,CreateEntity);
-	FRIEND_TEST(EntityManagerTests,AddComponent);
-	FRIEND_TEST(EntityManagerTests,RemoveComponent);
-	explicit Entity(const entityID _id):id{_id},mask(),indicies{} {}
 
 	inline void clear(){
 		mask.reset();
 		indicies.fill(0);
 	}
 
+	entityID id;
 	std::bitset<maxComponents> mask;
 	std::array<indexType,maxComponents> indicies;
+private:
+
+	FRIEND_TEST(EntityManagerTests,PurgeEntity);
+	FRIEND_TEST(EntityManagerTests,CreateEntity);
+	FRIEND_TEST(EntityManagerTests,AddComponent);
+	FRIEND_TEST(EntityManagerTests,RemoveComponent);
+	
+	explicit Entity(const entityID _id):id{_id},mask(),indicies{} {}
 };
 /*
  * Class handling a list of entities and all their components.
  * The first template parameter should be the indexing type for
- * your entities, chosen based on the maximum number of entites
+ * your entities, chosen based on the maximum number of entities
  * you plan to have, for instance if you know you'll never need
  * more than 256 entities you can use uint8_t. The remaining
  * template parameters should consist of every component class
@@ -62,11 +63,56 @@ public:
 		"indexType must be an unsigned arithmetic type");
 	typedef Entity<sizeof...(components),indexType> entity;
 	typedef indexType entityID;
+	typedef std::array<std::vector<indexType>,sizeof...(components)> componentIndexArray;
 	template<class Key>
 	using getTypeIndex = find_first<VectorTuple<components...>,Key>;
 
 	EntityManager():nextID{0}{}
 	~EntityManager(){}
+
+/************************ACCESSORS************************************/
+	/* WARNING!
+	 * Non const accessors are provided to allow users direct access to
+	 * the underlying data, modifying data in this way can really screw
+	 * up the operation of the framework if you're not careful.
+	 * Prefer not modifying the raw data structures unless you:
+	 * 1) Can't do something with a built in function
+	 * 2) Are very careful
+	 */
+
+	//get the vector of entities
+	std::vector<entity> & getEntityVector(){
+		return entities;
+	}
+	const std::vector<entity> & getEntityVector()const{
+		return entities;
+	}
+
+	//get the set of initialized but unused entities
+	std::set<entityID> & getFreeEntites(){
+		return freeEntities;
+	}
+	const std::set<entityID> & getFreeEntites()const{
+		return freeEntities;
+	}
+
+	//get the VectorTuple of component vectors
+	VectorTuple<components...> & getComponentVectors(){
+		return componentVectors;
+	}
+	const VectorTuple<components...> & getComponentVectors()const{
+		return componentVectors;
+	}
+
+	//get the array of vectors of initialized but unused components
+	componentIndexArray & getFreeComponents(){
+		return freeComponents;
+	}
+	const componentIndexArray & getFreeComponents()const{
+		return freeComponents;
+	}
+
+/***************************END ACCESSORS******************************/
 
 	entityID createEntity(){
 		if(freeEntities.empty() == true){
@@ -83,7 +129,7 @@ public:
 		}
 	}
 
-	//Sets the ID and components of an entity to be availible when creating a new
+	//Sets the ID and components of an entity to be available when creating a new
 	//entity, but does not delete the components. If your code makes assumptions
 	//about the data layout after removing an entity, you may want to use purgeEntity()
 	//instead.

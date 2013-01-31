@@ -39,12 +39,12 @@ public:
 
 	inline void addSystem(const SystemPtr s){
 		systems.add(s);
-		s->init(*this);
+		s->init(this);
 	}
 
 	inline void removeSystem(const SystemPtr s){
 		systems.remove(s);
-		s->destroy(*this);
+		s->destroy(this);
 	}
 
 	inline SystemPtr getSystem(const int id){
@@ -53,6 +53,22 @@ public:
 
 	inline void update(const double t){
 		systems.update(t);
+	}
+
+	SystemManager<indexType,components...>& getSystemManager(){
+		return systems;
+	}
+
+	const SystemManager<indexType,components...>& getSystemManager()const{
+		return systems;
+	}
+
+	EntityManager<indexType,components...>& getEntityManager(){
+		return entities;
+	}
+
+	const EntityManager<indexType,components...>& getEntityManager()const{
+		return entities;
 	}
 private:
 	SystemManager<indexType,components...> systems;

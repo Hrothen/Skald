@@ -3,45 +3,6 @@
 
 namespace skald{
 
-class TestSystem1 : public testWorld::SystemBase{
-public:
-	TestSystem1(int p,int t):System(p,t),testVal(0){}
-	~TestSystem1(){}
-	int testVal;
-	const int id()const override{return 1;}
-	void init(testWorld*) override{}
-	void destroy(testWorld*) override{}
-	void update(const double d) override{
-		testVal++;
-	}
-};
-
-class TestSystem2 : public testWorld::SystemBase{
-public:
-	TestSystem2(int p,int t):System(p,t),testVal(0){}
-	~TestSystem2(){}
-	int testVal;
-	const int id()const override{return 2;}
-	void init(testWorld*) override{}
-	void destroy(testWorld*) override{}
-	void update(const double d) override{
-		testVal--;
-	}
-};
-
-class TestSystem3 : public testWorld::SystemBase{
-public:
-	TestSystem3(int p,int t):System(p,t),testVal(0){}
-	~TestSystem3(){}
-	int testVal;
-	const int id()const override{return 3;}
-	void init(testWorld*) override{}
-	void destroy(testWorld*) override{}
-	void update(const double d) override{
-		testVal += static_cast<int>(d);
-	}
-};
-
 class SystemTests : public ::testing::Test{
 public:
 	SystemTests(){}
@@ -49,7 +10,6 @@ public:
 protected:
 	SystemManager<uint8_t,compA,compB,compC> manager;
 };
-
 
 TEST_F(SystemTests,AddSystem){
 	EXPECT_EQ(0,manager.systems.size());
