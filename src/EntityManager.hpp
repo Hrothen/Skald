@@ -61,6 +61,7 @@ class EntityManager{
 public:
 	static_assert(std::is_unsigned<indexType>::value == true,
 		"indexType must be an unsigned arithmetic type");
+
 	typedef Entity<sizeof...(components),indexType> entity;
 	typedef indexType entityID;
 	typedef std::array<std::vector<indexType>,sizeof...(components)> componentIndexArray;
@@ -116,6 +117,9 @@ public:
 
 	entityID createEntity(){
 		if(freeEntities.empty() == true){
+			//check that we're not about to overflow
+			assert(nextID != std::numeric_limits<entityID>::max());
+
 			nextID++;
 			if(nextID > entities.size())
 				entities.resize(nextID,entity(nextID - 1));
@@ -134,6 +138,10 @@ public:
 	//about the data layout after removing an entity, you may want to use purgeEntity()
 	//instead.
 	void removeEntity(const entityID id){
+		//check that id is a valid entityID
+		assert(freeEntities.count(id) == 0);
+		assert(id < nextID);
+
 		if(id == nextID - 1)
 			nextID--;
 		else
@@ -149,7 +157,10 @@ public:
 	//deletes an entity's components from the pool and discards it
 	//only use this if you really need the components removed, it's slow
 	void purgeEntity(const entityID id){
-		//deleteComponents(entities[id].mask,entities[id].indicies);
+		//check that id is a valid entityID
+		assert(freeEntities.count(id) == 0);
+		assert(id < nextID);
+
 		deleteComponents(id);
 		entities[id].clear();
 		if(id == nextID - 1)
@@ -161,10 +172,14 @@ public:
 	//adds a component to the specified entity
 	template <class T>
 	void addComponent(const entityID e,T component){
+		
 		const int componentIndex = getTypeIndex<T>::value;
 		auto & v = componentVectors.template getByType<T>();
 		auto & f = freeComponents[componentIndex];
 
+		//check that id is a valid entityID
+		assert(freeEntities.count(e) == 0);
+		assert(e < nextID);
 		//make sure we aren't inserting a component that's already there
 		assert(entities[e].mask[componentIndex] == false);
 		
@@ -187,6 +202,13 @@ public:
 	void removeComponent(const entityID e){
 		const int componentIndex = getTypeIndex<T>::value;
 		auto & f = freeComponents[componentIndex];
+
+		//check that id is a valid entityID
+		assert(freeEntities.count(e) == 0);
+		assert(e < nextID);
+		//check that the entity actually has that component
+		assert(entities[e].mask[componentIndex] == true);
+
 		f.push_back(entities[e].indicies[componentIndex]);
 		//Zero is still a valid component index, which is unfortunate.
 		//I could deal with this by using signed ints, but then

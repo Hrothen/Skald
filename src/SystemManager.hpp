@@ -36,10 +36,13 @@ public:
 			systems.insert(i,s);
 		else{
 			//check that the system isn't already in systems
+			#ifndef NDEBUG
 			auto j = i;
 			j--;
-			if((*j)->id() != s->id())
-				systems.insert(i,s);
+			assert((*j)->id() != s->id());
+			#endif
+			//if((*j)->id() != s->id())
+			systems.insert(i,s);
 		}
 	}
 
@@ -47,15 +50,17 @@ public:
 	void remove(const SystemPtr s){
 		auto i = std::lower_bound(systems.begin(),systems.end(),
 			s,Comparator<SystemPtr>());
-		if(i != systems.end())
-			systems.erase(i);
+		assert(i != systems.end());
+		//if(i != systems.end())
+		systems.erase(i);
 	}
 
 	void remove(const int id){
 		auto i = std::lower_bound(systems.begin(),systems.end(),
 			id,Comparator<SystemPtr>());
-		if(i != systems.end())
-			systems.erase(i);
+		assert(i != systems.end());
+		//if(i != systems.end())
+		systems.erase(i);
 	}
 
 	//runs each systems update() method
@@ -66,6 +71,7 @@ public:
 		lockSystems = false;
 	}
 
+	//returns a shared pointer to the system with the given id
 	SystemPtr get(const int id){
 		for(auto S : systems)
 			if(S->id() == id)
