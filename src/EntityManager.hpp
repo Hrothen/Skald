@@ -39,12 +39,8 @@ public:
 	std::bitset<maxComponents> mask;
 	std::array<indexType,maxComponents> indicies;
 private:
-
-	FRIEND_TEST(EntityManagerTests,PurgeEntity);
-	FRIEND_TEST(EntityManagerTests,CreateEntity);
-	FRIEND_TEST(EntityManagerTests,AddComponent);
-	FRIEND_TEST(EntityManagerTests,RemoveComponent);
 	
+	//only EntityManager can create an entity
 	explicit Entity(const entityID _id):id{_id},mask(),indicies{} {}
 };
 /*
@@ -219,16 +215,8 @@ public:
 		entities[e].mask.reset(componentIndex);
 	}
 private:
-	//gtest friend declarations so we can access private members in tests
+	//gtest friend declaration so we can access private members in tests
 	friend class EntityManagerTests;
-	FRIEND_TEST(EntityManagerTests,DefaultConstructor);
-	FRIEND_TEST(EntityManagerTests,CreateEntity);
-	FRIEND_TEST(EntityManagerTests,RemoveEntity);
-	FRIEND_TEST(EntityManagerTests,PurgeEntity);
-	FRIEND_TEST(EntityManagerTests,ReuseEntity);
-	FRIEND_TEST(EntityManagerTests,AddComponent);
-	FRIEND_TEST(EntityManagerTests,RemoveComponent);
-
 
 	//takes a bitmask and a vector of indicies and deletes all the corresponding
 	//components from their lists, also updates the other entities so their

@@ -82,10 +82,6 @@ public:
 private:
 
 	friend class SystemTests;
-	FRIEND_TEST(SystemTests,AddSystem);
-	FRIEND_TEST(SystemTests,RemoveSystem);
-	FRIEND_TEST(SystemTests,Update);
-	FRIEND_TEST(SystemTests,Get);
 
 	//vector of system pointers, sorted by priority
 	std::vector<SystemPtr> systems;
