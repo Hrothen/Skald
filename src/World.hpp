@@ -32,6 +32,11 @@ public:
 		entities.addComponent(e,std::forward<T>(c));
 	}
 
+	template<class T, class... Args>
+	inline T& constructComponent(const entityID e,Args&& ...args){
+		return entities.constructComponent<T>(e,std::forward<Args>(args)...);
+	}
+
 	template<class T>
 	inline void removeComponent(const entityID e){
 		entities.removeComponent<T>(e);

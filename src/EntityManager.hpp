@@ -166,7 +166,7 @@ public:
 	}
 
 	//adds a component to the specified entity
-	template <class T>
+	template<class T>
 	void addComponent(const entityID e,T component){
 		
 		const int componentIndex = getTypeIndex<T>::value;
@@ -191,6 +191,36 @@ public:
 			v.push_back(component);
 			entities[e].indicies[componentIndex] = v.size() - 1;
 		}
+	}
+
+	template<class T,class... Args>
+	T& constructComponent(const entityID e,Args&& ...args){
+
+		const int componentIndex = getTypeIndex<T>::value;
+		auto & v = componentVectors.template getByType<T>();
+		auto & f = freeComponents[componentIndex];
+
+		//check that id is a valid entityID
+		assert(freeEntities.count(e) == 0);
+		assert(e < nextID);
+		//make sure we aren't inserting a component that's already there
+		assert(entities[e].mask[componentIndex] == false);
+		
+		entities[e].mask.set(componentIndex,true);
+
+		T temp{std::forward<Args>(args)...};
+		if(f.empty() == false){
+			v[f.back()] = temp;
+			entities[e].indicies[componentIndex] = f.back();
+			f.pop_back();
+		}
+		else{
+			v.push_back(temp);
+			entities[e].indicies[componentIndex] = v.size() - 1;
+		}
+		//return a reference to the component in case the user
+		//wants to modify it
+		return v[entities[e].indicies[componentIndex]];
 	}
 
 	//removes a component of type T from the specified entity
