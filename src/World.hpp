@@ -34,7 +34,7 @@ public:
 
 	template<class T>
 	inline void removeComponent(const entityID e){
-		entities.removeComponent<T>(e);
+		entities.template removeComponent<T>(e);
 	}
 
 	inline void addSystem(const SystemPtr s){
