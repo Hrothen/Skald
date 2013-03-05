@@ -8,6 +8,15 @@ project(Skald)
 # Set relative link path base to source directory
 cmake_policy(SET CMP0015 NEW)
 
+if ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang")
+    set (CPP11_FLAGS "-std=c++11 -stdlib=libc++")
+else ()
+    set (CPP11_FLAGS "-std=c++11")
+endif()
+
+set (CMAKE_CXX_FLAGS "${CPP11_FLAGS} -Wall")
+include_directories(${CMAKE_SOURCE_DIR}/src)
+
 # Library Sources
 set (${PROJECT_NAME}_SOURCES
     src/Component.hpp
@@ -40,8 +49,6 @@ set (${PROJECT_NAME}_TEST_SOURCES
 )
 
 # Test Build Rules
-set (CMAKE_CXX_FLAGS "-std=c++11 -Wall")
-include_directories(${CMAKE_SOURCE_DIR}/src)
 add_executable(testrunner ${${PROJECT_NAME}_TEST_SOURCES})
-target_link_libraries(testrunner gtest gtest_main)
+target_link_libraries(testrunner gtest_main gtest )
 add_test(testrunner testrunner)
