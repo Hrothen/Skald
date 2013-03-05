@@ -32,15 +32,33 @@ TEST_F(WorldTests,AddComponent){
 	auto & e = world.getEntityManager().getEntityVector();
 	auto & v = world.getEntityManager().getComponentVectors();
 	ASSERT_EQ(1,e.size());
-	ASSERT_EQ(1,v.getByType<compA>().size());
-	EXPECT_EQ(a.id,v.getByType<compA>().at(0).id);
-	ASSERT_EQ(1,v.getByType<compB>().size());
-	EXPECT_EQ(b.id,v.getByType<compB>().at(0).id);
-	EXPECT_EQ(b.first,v.getByType<compB>().at(0).first);
-	ASSERT_EQ(1,v.getByType<compC>().size());
-	EXPECT_EQ(c.id,v.getByType<compC>().at(0).id);
-	EXPECT_EQ(c.first,v.getByType<compC>().at(0).first);
-	EXPECT_EQ(c.second,v.getByType<compC>().at(0).second);
+	ASSERT_EQ(1,getByType<compA>(v).size());
+	EXPECT_EQ(a.id,getByType<compA>(v).at(0).id);
+	ASSERT_EQ(1,getByType<compB>(v).size());
+	EXPECT_EQ(b.id,getByType<compB>(v).at(0).id);
+	EXPECT_EQ(b.first,getByType<compB>(v).at(0).first);
+	ASSERT_EQ(1,getByType<compC>(v).size());
+	EXPECT_EQ(c.id,getByType<compC>(v).at(0).id);
+	EXPECT_EQ(c.first,getByType<compC>(v).at(0).first);
+	EXPECT_EQ(c.second,getByType<compC>(v).at(0).second);
+}
+TEST_F(WorldTests,ConstructComponent){
+	auto i = world.addEntity();
+	world.constructComponent<compA>(i,1UL);
+	world.constructComponent<compB>(i,2UL,3);
+	world.constructComponent<compC>(i,3UL,4,5);
+	auto & e = world.getEntityManager().getEntityVector();
+	auto & v = world.getEntityManager().getComponentVectors();
+	ASSERT_EQ(1,e.size());
+	ASSERT_EQ(1,getByType<compA>(v).size());
+	EXPECT_EQ(1UL,getByType<compA>(v).at(0).id);
+	ASSERT_EQ(1,getByType<compB>(v).size());
+	EXPECT_EQ(2UL,getByType<compB>(v).at(0).id);
+	EXPECT_EQ(3,getByType<compB>(v).at(0).first);
+	ASSERT_EQ(1,getByType<compC>(v).size());
+	EXPECT_EQ(3UL,getByType<compC>(v).at(0).id);
+	EXPECT_EQ(4,getByType<compC>(v).at(0).first);
+	EXPECT_EQ(5,getByType<compC>(v).at(0).second);
 }
 TEST_F(WorldTests,ConstructComponent){
 	auto i = world.addEntity();
@@ -70,10 +88,10 @@ TEST_F(WorldTests,RemoveComponent){
 	world.addComponent(i,c);
 	auto & e = world.getEntityManager().getFreeComponents();
 	auto & v = world.getEntityManager().getComponentVectors();
-	ASSERT_EQ(1,v.getByType<compB>().size());
+	ASSERT_EQ(1,getByType<compB>(v).size());
 	EXPECT_EQ(0,e.at(1).size());
 	world.removeComponent<compB>(i);
-	EXPECT_EQ(1,v.getByType<compB>().size());
+	EXPECT_EQ(1,getByType<compB>(v).size());
 	EXPECT_EQ(1,e.at(1).size());
 }
 TEST_F(WorldTests,AddSystem){

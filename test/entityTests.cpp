@@ -1,6 +1,7 @@
 #include <gtest/gtest.h>
 #include "tests_shared.hpp"
 
+using namespace std;
 namespace skald{
 class EntityManagerTests : public ::testing::Test{
 public:
@@ -8,9 +9,9 @@ public:
 		EXPECT_EQ(0,e.nextID);
 		EXPECT_EQ(0,e.entities.size());
 		EXPECT_EQ(0,e.freeEntities.size());
-		auto a = e.componentVectors.template get<0>();
-		auto b = e.componentVectors.template get<1>();
-		auto c = e.componentVectors.template get<2>();
+		auto a = get<0>(e.componentVectors);
+		auto b = get<1>(e.componentVectors);
+		auto c = get<2>(e.componentVectors);
 		EXPECT_EQ(0,a.size());
 		EXPECT_EQ(0,b.size());
 		EXPECT_EQ(0,c.size());
@@ -43,8 +44,8 @@ public:
 	void PurgeEntity(){
 		auto i = e.createEntity();
 		auto j = e.createEntity();
-		compA a,b;
-		a.id = b.id = 1UL;
+		compA a{1UL},b{1UL};
+		//a.id = b.id = 1UL;
 		e.addComponent(i,a);
 		e.addComponent(j,b);
 		EXPECT_EQ(0,e.entities[i].indicies[0]);
@@ -52,7 +53,7 @@ public:
 		EXPECT_EQ(true,e.entities[i].mask[0]);
 		EXPECT_EQ(true,e.entities[j].mask[0]);
 		e.purgeEntity(i);
-		auto & v = e.componentVectors.template get<0>();
+		auto & v = get<0>(e.componentVectors);
 		EXPECT_EQ(1,v.size());
 		EXPECT_EQ(1,e.freeEntities.size());
 		EXPECT_EQ(0,e.freeComponents[0].size());
