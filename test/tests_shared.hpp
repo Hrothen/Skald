@@ -7,15 +7,19 @@
 namespace skald{
 
 struct compA{
+	compA(unsigned long _id):id{_id}{}
 	unsigned long id;
 };
 
 struct compB{
+	compB(unsigned long _id,int _first):id{_id},first{_first}{}
 	unsigned long id;
 	int first;
 };
 
 struct compC{
+	compC(unsigned long _id,int _first,int _second):id{_id},first{_first},
+													second{_second}{}
 	unsigned long id;
 	int first;
 	int second;

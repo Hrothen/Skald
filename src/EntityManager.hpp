@@ -9,10 +9,67 @@
 #include <utility>
 #include <set>
 #include <type_traits>
-#include "VectorTuple.hpp"
+//#include "VectorTuple.hpp"
 
 namespace skald{
-//typedef uint16_t entityID;
+
+/************************************************************/
+
+//found this code on stackoverflow at
+//http://stackoverflow.com/questions/6032089/position-of-a-type-in-a-variadic-template-parameter-pack/6032645#6032645
+
+//find_first has an element value holding the index of the first element
+//of type T in the paramter pack of the given Tuple type
+
+template<class Tuple, class T, std::size_t Index = 0>
+struct find_first;
+
+//find_first_final_test is used to check that the type exists in the parameter pack
+//a compile time error will be thrown if the type isn't found
+template<std::size_t Index,bool Valid>
+struct find_first_final_test : public std::integral_constant<std::size_t,Index>{};
+
+template<std::size_t Index>
+struct find_first_final_test<Index,false>{
+	static_assert(Index == -1, "Type not found in paramater pack");
+};
+
+template<class Head, class T, std::size_t Index>
+struct find_first<std::tuple<std::vector<Head>>,T,Index>
+	: public find_first_final_test<Index, std::is_same<Head,T>::value>{};
+
+template<class Head, class... Rest, class T, std::size_t Index>
+struct find_first<std::tuple<std::vector<Head>,std::vector<Rest>...>,T,Index>
+	: public std::conditional<std::is_same<Head,T>::value,
+					std::integral_constant<std::size_t,Index>,
+					find_first<std::tuple<std::vector<Rest>...>,T,Index+1>>::type
+{	
+};
+
+/************************************************************/
+
+template<class Key,class... Types>
+//typename std::tuple_element<I, std::tuple<Types...>>::type&
+std::vector<Key>&
+getByType(std::tuple<Types...>& t){
+	return std::get<find_first<std::tuple<Types...>,Key>::value>(t);
+}
+
+template<class Key,class... Types>
+//typename std::tuple_element<I, std::tuple<Types...>>::type&&
+std::vector<Key>&&
+getByType(std::tuple<Types...>&& t){
+	return std::get<find_first<std::tuple<Types...>,Key>::value>(t);
+}
+
+template<class Key,class... Types>
+//typename std::tuple_element<I, std::tuple<Types...>>::type const&
+std::vector<Key>const &
+getByType(const std::tuple<Types...>& t){
+	return std::get<find_first<std::tuple<Types...>,Key>::value>(t);
+}
+
+/************************************************************/
 
 /*
  * Class representing an entity in the system.
@@ -62,7 +119,8 @@ public:
 	typedef indexType entityID;
 	typedef std::array<std::vector<indexType>,sizeof...(components)> componentIndexArray;
 	template<class Key>
-	using getTypeIndex = find_first<VectorTuple<components...>,Key>;
+	//using getTypeIndex = find_first<VectorTuple<components...>,Key>;
+	using getTypeIndex = find_first<std::tuple<std::vector<components>...>,Key>;
 
 	EntityManager():nextID{0}{}
 	~EntityManager(){}
@@ -94,10 +152,10 @@ public:
 	}
 
 	//get the VectorTuple of component vectors
-	VectorTuple<components...> & getComponentVectors(){
+	std::tuple<std::vector<components>...> & getComponentVectors(){
 		return componentVectors;
 	}
-	const VectorTuple<components...> & getComponentVectors()const{
+	const std::tuple<std::vector<components>...> & getComponentVectors()const{
 		return componentVectors;
 	}
 
@@ -143,7 +201,7 @@ public:
 		else
 			freeEntities.insert(id);
 		//add components to the free components lists
-		for(int i = 0; i < entities[id].indicies.size(); ++i){
+		for(unsigned int i = 0; i < entities[id].indicies.size(); ++i){
 			if(entities[id].mask[i] == true)
 				freeComponents[i].push_back(entities[id].indicies[i]);
 		}
@@ -170,7 +228,7 @@ public:
 	void addComponent(const entityID e,T component){
 		
 		const int componentIndex = getTypeIndex<T>::value;
-		auto & v = componentVectors.template getByType<T>();
+		auto & v = getByType<T>(componentVectors);
 		auto & f = freeComponents[componentIndex];
 
 		//check that id is a valid entityID
@@ -194,15 +252,46 @@ public:
 	}
 
 	template<class T,class... Args>
-	T& constructComponent(const entityID e,Args&& ...args){
+	typename std::enable_if<std::is_move_constructible<T>::value == false,T&>::type
+	constructComponent(const entityID e,Args&& ...args){
 
 		const int componentIndex = getTypeIndex<T>::value;
-		auto & v = componentVectors.template getByType<T>();
-		
+		auto & v = getByType<T>(componentVectors);
+
 		T temp{std::forward<Args>(args)...};
 		addComponent<T>(e,temp);
 		//return a reference to the component in case the user
 		//wants to modify it
+		return v[entities[e].indicies[componentIndex]];
+	}
+
+	template<class T,class... Args>
+	typename std::enable_if<std::is_move_constructible<T>::value,T&>::type
+	constructComponent(const entityID e,Args&& ...args){
+
+		const int componentIndex = getTypeIndex<T>::value;
+		//auto & v = componentVectors.template getByType<T>();
+		auto & v = getByType<T>(componentVectors);
+		auto & f = freeComponents[componentIndex];
+
+		//check that id is a valid entityID
+		assert(freeEntities.count(e) == 0);
+		assert(e < nextID);
+		//make sure we aren't inserting a component that's already there
+		assert(entities[e].mask[componentIndex] == false);
+		
+		entities[e].mask.set(componentIndex,true);
+
+		//if we have a free component use that, otherwise add one
+		if(f.empty() == false){
+			v[f.back()] = T(std::forward<Args>(args)...);
+			entities[e].indicies[componentIndex] = f.back();
+			f.pop_back();
+		}
+		else{
+			v.emplace_back(std::forward<Args>(args)...);
+			entities[e].indicies[componentIndex] = v.size() - 1;
+		}
 		return v[entities[e].indicies[componentIndex]];
 	}
 
@@ -238,7 +327,7 @@ private:
 	inline typename std::enable_if<(Index > 0)>::type
 	deleteComponents(const entityID id){
 		if(entities[id].mask[Index] == true){
-			auto & row = componentVectors.template get<Index>();
+			auto & row = std::get<Index>(componentVectors);
 			auto iter = row.begin();
 			std::advance(iter,entities[id].indicies[Index]);
 			row.erase(iter);
@@ -262,7 +351,7 @@ private:
 	inline typename std::enable_if<(Index == 0)>::type
 	deleteComponents(const entityID id){
 		if(entities[id].mask[Index] == true){
-			auto & row = componentVectors.template get<Index>();
+			auto & row = std::get<Index>(componentVectors);
 			auto iter = row.begin();
 			std::advance(iter,entities[id].indicies[Index]);
 			row.erase(iter);
@@ -286,7 +375,7 @@ private:
 	//set of entityIDs that have been discarded and can be reused
 	std::set<entityID> freeEntities;
 	//tuple of vectors of components
-	VectorTuple<components...> componentVectors;
+	std::tuple<std::vector<components>...> componentVectors;
 	//array of index sets used to keep track of discarded components
 	//TODO: might be better to use a deque stack than vectors, consider it
 	std::array<std::vector<indexType>,sizeof...(components)> freeComponents;
