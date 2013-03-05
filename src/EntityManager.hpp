@@ -3,7 +3,7 @@
 #define SKALD_ENTITY_MANAGER_HPP
 #include <cassert>
 #include <bitset>
-#include <cstdint>
+#include <stdint.h>
 #include <vector>
 #include <array>
 #include <utility>
