@@ -15,7 +15,6 @@ else ()
 endif()
 
 set (CMAKE_CXX_FLAGS "${CPP11_FLAGS} -Wall")
-include_directories(/usr/local/Cellar/boost/1.52.0/include)
 include_directories(${CMAKE_SOURCE_DIR}/src)
 
 # Library Sources
