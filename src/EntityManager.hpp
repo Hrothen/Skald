@@ -251,6 +251,7 @@ public:
 		}
 	}
 
+	template<class T,class... Args>
 	typename std::enable_if<std::is_move_constructible<T>::value == false,T&>::type
 	constructComponent(const entityID e,Args&& ...args){
 

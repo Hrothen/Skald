@@ -60,24 +60,6 @@ TEST_F(WorldTests,ConstructComponent){
 	EXPECT_EQ(4,getByType<compC>(v).at(0).first);
 	EXPECT_EQ(5,getByType<compC>(v).at(0).second);
 }
-TEST_F(WorldTests,ConstructComponent){
-	auto i = world.addEntity();
-	world.constructComponent<compA>(i,1UL);
-	world.constructComponent<compB>(i,2UL,3);
-	world.constructComponent<compC>(i,3UL,4,5);
-	auto & e = world.getEntityManager().getEntityVector();
-	auto & v = world.getEntityManager().getComponentVectors();
-	ASSERT_EQ(1,e.size());
-	ASSERT_EQ(1,v.getByType<compA>().size());
-	EXPECT_EQ(1UL,v.getByType<compA>().at(0).id);
-	ASSERT_EQ(1,v.getByType<compB>().size());
-	EXPECT_EQ(2UL,v.getByType<compB>().at(0).id);
-	EXPECT_EQ(3,v.getByType<compB>().at(0).first);
-	ASSERT_EQ(1,v.getByType<compC>().size());
-	EXPECT_EQ(3UL,v.getByType<compC>().at(0).id);
-	EXPECT_EQ(4,v.getByType<compC>().at(0).first);
-	EXPECT_EQ(5,v.getByType<compC>().at(0).second);
-}
 TEST_F(WorldTests,RemoveComponent){
 	auto i = world.addEntity();
 	compA a{1UL};
