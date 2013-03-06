@@ -34,7 +34,7 @@ public:
 
 	template<class T, class... Args>
 	inline T& constructComponent(const entityID e,Args&& ...args){
-		return entities.constructComponent<T>(e,std::forward<Args>(args)...);
+		return entities.template constructComponent<T>(e,std::forward<Args>(args)...);
 	}
 
 	template<class T>
