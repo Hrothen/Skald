@@ -223,6 +223,8 @@ public:
 	//adds a component to the specified entity
 	template<class T>
 	void addComponent(const entityID e,T component){
+		static_assert(std::is_move_constructible<T>::value,
+			"Error, all components must satisfy is_move_constructible");
 		
 		const int componentIndex = getTypeIndex<T>::value;
 		auto & v = getByType<T>(componentVectors);
