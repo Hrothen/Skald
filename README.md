@@ -16,8 +16,6 @@ In particular Skald aims to meld the typical Entity-Component design with the da
 The following are required to use Skald:
 
 - A reasonably new compiler such as clang3.1 or gcc4.7, technically the latest visual c++ compiler should work, but their standard library hasn't been updated yet and I haven't tested it.
-- [Boost](http://boost.org) `1.48.0` or higher. Boost Concepts is used to enforce POD requirements on components. If you don't want to link against boost you can alternately remove the concept check and include directive in VectorTuple.hpp.
-
 To build the tests you will additionally need:
 
 - [CMake](http://cmake.org/)
