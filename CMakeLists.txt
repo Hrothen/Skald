@@ -19,13 +19,10 @@ include_directories(${CMAKE_SOURCE_DIR}/src)
 
 # Library Sources
 set (${PROJECT_NAME}_SOURCES
-    src/Component.hpp
-    #src/Components.hpp
     src/EntityManager.hpp
     src/System.hpp
     src/SystemManager.hpp
     src/World.hpp
-    #src/VectorTuple.hpp
 )
 
 # Google Test Integration
@@ -43,7 +40,6 @@ include_directories(
 set (${PROJECT_NAME}_TEST_SOURCES
     test/runAllTests.cpp
     test/entityTests.cpp
-    #test/vectorTupleTests.cpp
     test/systemTests.cpp
     test/worldTests.cpp
 )
