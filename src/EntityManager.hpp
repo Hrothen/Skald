@@ -9,7 +9,6 @@
 #include <utility>
 #include <set>
 #include <type_traits>
-//#include "VectorTuple.hpp"
 
 namespace skald{
 
@@ -20,6 +19,8 @@ namespace skald{
 
 //find_first has an element value holding the index of the first element
 //of type T in the paramter pack of the given Tuple type
+
+//This particular implementation assumes a tuple of std::vectors
 
 template<class Tuple, class T, std::size_t Index = 0>
 struct find_first;
@@ -49,21 +50,18 @@ struct find_first<std::tuple<std::vector<Head>,std::vector<Rest>...>,T,Index>
 /************************************************************/
 
 template<class Key,class... Types>
-//typename std::tuple_element<I, std::tuple<Types...>>::type&
 std::vector<Key>&
 getByType(std::tuple<Types...>& t){
 	return std::get<find_first<std::tuple<Types...>,Key>::value>(t);
 }
 
 template<class Key,class... Types>
-//typename std::tuple_element<I, std::tuple<Types...>>::type&&
 std::vector<Key>&&
 getByType(std::tuple<Types...>&& t){
 	return std::get<find_first<std::tuple<Types...>,Key>::value>(t);
 }
 
 template<class Key,class... Types>
-//typename std::tuple_element<I, std::tuple<Types...>>::type const&
 std::vector<Key>const &
 getByType(const std::tuple<Types...>& t){
 	return std::get<find_first<std::tuple<Types...>,Key>::value>(t);
@@ -119,7 +117,6 @@ public:
 	typedef indexType entityID;
 	typedef std::array<std::vector<indexType>,sizeof...(components)> componentIndexArray;
 	template<class Key>
-	//using getTypeIndex = find_first<VectorTuple<components...>,Key>;
 	using getTypeIndex = find_first<std::tuple<std::vector<components>...>,Key>;
 
 	EntityManager():nextID{0}{}
@@ -270,7 +267,6 @@ public:
 	constructComponent(const entityID e,Args&& ...args){
 
 		const int componentIndex = getTypeIndex<T>::value;
-		//auto & v = componentVectors.template getByType<T>();
 		auto & v = getByType<T>(componentVectors);
 		auto & f = freeComponents[componentIndex];
 
