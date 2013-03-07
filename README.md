@@ -16,6 +16,7 @@ In particular Skald aims to meld the typical Entity-Component design with the da
 The following are required to use Skald:
 
 - A reasonably new compiler such as clang3.1 or gcc4.7, technically the latest visual c++ compiler should work, but their standard library hasn't been updated yet and I haven't tested it.
+
 To build the tests you will additionally need:
 
 - [CMake](http://cmake.org/)
