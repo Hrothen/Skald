@@ -248,6 +248,9 @@ public:
 		}
 	}
 
+	/*
+	This is unneeded since all POD types hsould be movable by default
+	I'm leaving it in a comment for now as a reference
 	template<class T,class... Args>
 	typename std::enable_if<std::is_move_constructible<T>::value == false,T&>::type
 	constructComponent(const entityID e,Args&& ...args){
@@ -261,10 +264,12 @@ public:
 		//wants to modify it
 		return v[entities[e].indicies[componentIndex]];
 	}
+	*/
 
 	template<class T,class... Args>
-	typename std::enable_if<std::is_move_constructible<T>::value,T&>::type
-	constructComponent(const entityID e,Args&& ...args){
+	T& constructComponent(const entityID e,Args&& ...args){
+		static_assert(std::is_move_constructible<T>::value,
+			"Error, all components must satisfy is_move_constructible");
 
 		const int componentIndex = getTypeIndex<T>::value;
 		auto & v = getByType<T>(componentVectors);
