@@ -20,7 +20,7 @@ include_directories(${CMAKE_SOURCE_DIR}/src)
 # Library Sources
 set (${PROJECT_NAME}_SOURCES
     src/Component.hpp
-    src/Components.hpp
+    #src/Components.hpp
     src/EntityManager.hpp
     src/System.hpp
     src/SystemManager.hpp
